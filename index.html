@@ -1,0 +1,2074 @@
+<!doctype html>
+<html lang="ms">
+ <head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260717-05-8209e4e"}');</script><script src="/_sdk/f432b76fb310b513.telemetry_sdk.js" integrity="sha512-9FJQ55EKmmqhyyik8BhrMVfm0+iYYfb8uOlRsjtkxJMEI97qOVEI4PnHohDjQAtvAep0IOEpdQ64eki0sz62ug=="></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KAFA Pintar</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Fraunces:opsz,wght@9..144,700;9..144,800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #244536;
+      --muted: #668072;
+      --mint: #dff5dd;
+      --mint-strong: #62bd83;
+      --yellow: #ffd76a;
+      --blue: #cceeff;
+      --paper: #fffef9;
+      --line: #e4eee5;
+      --coral: #ff8d70;
+      --shadow: 0 16px 40px rgba(57, 98, 70, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: #edf6ed; }
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
+      font-family: "DM Sans", sans-serif;
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible {
+      outline: 3px solid #2788b3;
+      outline-offset: 3px;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 480px;
+      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      background: var(--paper);
+      box-shadow: 0 0 60px rgba(38, 74, 53, 0.13);
+    }
+
+    .app-shell.reading-mode { background: #fbfaf3; }
+    .app-shell.reading-mode .decor { opacity: 0.35; }
+    .app-shell.reading-mode .content-card,
+    .app-shell.reading-mode .lesson-panel { box-shadow: none; }
+
+    .app-main {
+      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
+      padding: 18px 18px 112px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .view {
+      display: none;
+      animation: slideIn 260ms ease both;
+    }
+    .view.active { display: block; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 12px 24px rgba(77, 169, 110, 0.25); transform: scale(1); }
+      50% { box-shadow: 0 18px 34px rgba(77, 169, 110, 0.43); transform: scale(1.025); }
+    }
+
+    .decor {
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .decor.one { width: 180px; height: 180px; background: #e4f7df; right: -72px; top: 92px; }
+    .decor.two { width: 110px; height: 110px; background: #fff0b8; left: -45px; top: 360px; }
+    .decor.three { width: 132px; height: 132px; background: #d7f2ff; right: -58px; bottom: 118px; }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #f2f9ed;
+      font-size: 0.73rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #4c8b5f;
+    }
+
+    .display-font { font-family: "Fraunces", serif; }
+
+    .content-card, .lesson-panel {
+      border: 1px solid rgba(74, 127, 85, 0.11);
+      box-shadow: var(--shadow);
+    }
+
+    .welcome-illustration {
+      width: 100%;
+      height: 214px;
+      border-radius: 28px;
+      overflow: hidden;
+      position: relative;
+      background: #dff4e5;
+      animation: float 5s ease-in-out infinite;
+    }
+
+    .welcome-illustration::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 45%, rgba(29, 93, 55, 0.16));
+      pointer-events: none;
+    }
+
+    .welcome-illustration img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .primary-btn {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border: 0;
+      color: #ffffff;
+      background: #53ad74;
+      border-radius: 18px;
+      padding: 16px 18px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      transition: transform 180ms ease, filter 180ms ease;
+    }
+    .primary-btn:hover { filter: brightness(0.96); transform: translateY(-2px); }
+    .pulse-btn { animation: pulseGlow 1.8s ease-in-out infinite; }
+
+    .soft-btn {
+      border: 0;
+      background: #f0f7ef;
+      color: #467754;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 0.86rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 12px 0 15px;
+    }
+    .section-heading h1,
+    .section-heading h2,
+    .section-heading p { margin: 0; }
+
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .subject-card {
+      border: 0;
+      min-height: 142px;
+      padding: 16px;
+      text-align: left;
+      border-radius: 24px;
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+    .subject-card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(51, 98, 68, 0.12); }
+    .subject-card.wide { grid-column: span 2; min-height: 108px; flex-direction: row; align-items: center; }
+    .subject-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.75);
+    }
+    .subject-card strong { font-size: 1rem; }
+    .subject-card span { font-size: 0.76rem; color: #4d735a; font-weight: 600; }
+
+    .year-list { display: grid; gap: 11px; }
+    .year-card {
+      width: 100%;
+      border: 1px solid #e1ebdf;
+      background: #ffffff;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 16px;
+      text-align: left;
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+    .year-card:hover { transform: translateX(4px); border-color: #84c89a; }
+    .year-badge {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: #346e48;
+      background: #e5f5e2;
+      font-weight: 800;
+    }
+
+    .lesson-panel {
+      background: #ffffff;
+      border-radius: 25px;
+      padding: 18px;
+    }
+    .lesson-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px dashed #dae8da;
+      line-height: 1.55;
+      font-size: 0.94rem;
+    }
+    .lesson-point:last-child { border-bottom: 0; }
+    .point-dot {
+      width: 23px;
+      height: 23px;
+      flex: 0 0 23px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #e6f5e4;
+      color: #3a8956;
+    }
+    .revision-tip {
+      margin-top: 15px;
+      padding: 14px;
+      border-radius: 16px;
+      background: #fff7d6;
+      color: #765c08;
+      line-height: 1.5;
+      font-size: 0.88rem;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(100%, 480px);
+      z-index: 20;
+      background: rgba(255, 254, 249, 0.97);
+      border-top: 1px solid #e3ece0;
+      box-shadow: 0 -10px 28px rgba(45, 87, 59, 0.08);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      padding: 8px 7px calc(8px + env(safe-area-inset-bottom));
+      backdrop-filter: blur(14px);
+    }
+
+    .nav-tab {
+      border: 0;
+      background: transparent;
+      color: #7d9485;
+      padding: 6px 2px;
+      border-radius: 14px;
+      display: flex;
+      min-height: 54px;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      gap: 3px;
+      font-size: 0.61rem;
+      font-weight: 800;
+      transition: color 160ms ease, background 160ms ease;
+    }
+    .nav-tab svg { width: 19px; height: 19px; }
+    .nav-tab.active { color: #2f8750; background: #e9f6e8; }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 2px 1px 10px;
+      scrollbar-width: none;
+    }
+    .filter-row::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      white-space: nowrap;
+      border: 1px solid #dcebdd;
+      background: #fff;
+      color: #587061;
+      padding: 8px 11px;
+      border-radius: 999px;
+      font-size: 0.77rem;
+      font-weight: 800;
+    }
+    .filter-chip.active { background: #58ae75; border-color: #58ae75; color: #fff; }
+
+    .score-card {
+      background: linear-gradient(135deg, #dff6e1, #ebf8ef);
+      padding: 16px;
+      border-radius: 21px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #d3ead6;
+      margin-bottom: 14px;
+    }
+    .score-circle {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: #59ad75;
+      font-weight: 800;
+    }
+
+    .question-card {
+      background: #fff;
+      border: 1px solid #e2ece2;
+      border-radius: 22px;
+      padding: 17px;
+      margin-bottom: 13px;
+      box-shadow: 0 8px 20px rgba(54, 91, 63, 0.06);
+    }
+    .question-label {
+      display: inline-flex;
+      background: #d8f1ff;
+      color: #2b7d9f;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .answer-option {
+      width: 100%;
+      border: 1px solid #dce9dd;
+      background: #fff;
+      color: #304f3c;
+      border-radius: 14px;
+      text-align: left;
+      padding: 11px 12px;
+      font-size: 0.88rem;
+      margin-top: 9px;
+      transition: background 140ms ease, border-color 140ms ease;
+    }
+    .answer-option:hover:not(:disabled) { background: #f4fbf2; border-color: #8bc99d; }
+    .answer-option.correct { background: #dcf5df; border-color: #66b97b; color: #27623c; }
+    .answer-option.wrong { background: #ffe4de; border-color: #ec927d; color: #8d3728; }
+    .answer-option:disabled { cursor: default; }
+    .feedback {
+      margin-top: 10px;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .feedback.correct { background: #e0f5df; color: #2c703f; }
+    .feedback.wrong { background: #ffebe5; color: #9b4938; }
+
+    .achievement-card {
+      background: #ffffff;
+      border: 1px solid #e0ece1;
+      border-radius: 21px;
+      padding: 15px;
+      display: flex;
+      gap: 13px;
+      align-items: center;
+      margin-bottom: 11px;
+    }
+    .achievement-icon {
+      width: 49px;
+      height: 49px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: #fff1bb;
+      color: #a57b00;
+    }
+    .achievement-card.locked { opacity: 0.48; filter: grayscale(0.4); }
+    .progress-track { height: 10px; background: #e7efe7; border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #70c789, #b3de7d); border-radius: inherit; transition: width 250ms ease; }
+
+    .setting-row {
+      background: #fff;
+      border: 1px solid #e2ece2;
+      border-radius: 18px;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .switch {
+      width: 48px;
+      height: 27px;
+      border-radius: 999px;
+      background: #c6d7c8;
+      border: 0;
+      padding: 3px;
+      display: flex;
+      align-items: center;
+      transition: background 180ms ease;
+    }
+    .switch .switch-dot {
+      width: 21px;
+      height: 21px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 180ms ease;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    }
+    .switch.on { background: #56ad74; }
+    .switch.on .switch-dot { transform: translateX(21px); }
+
+    .empty-note {
+      padding: 22px 15px;
+      background: #f4faf2;
+      color: #62806b;
+      text-align: center;
+      border-radius: 18px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 370px) {
+      .app-main { padding-left: 14px; padding-right: 14px; }
+      .nav-tab { font-size: 0.55rem; }
+      .subject-card { min-height: 130px; }
+    }
+  </style>
+  <script src="/_sdk/e3937a0574eb2d69.data_sdk.js" type="text/javascript" integrity="sha512-xbp/ACqEQy1aDxYMtXTrR3y5MUbzxuggRR/9sD48Gl4VhLMMCiAHsxMaFV6DTdeBpR6ymF+t2zhPKYkWM3+Jfw=="></script>
+  <script src="/_sdk/9432170dbd2ae0df.resizing_sdk.js" type="text/javascript" integrity="sha512-FeT+58sb1f9ejWPWFjCbJvTT+SDwGV+ngrHUnlO7TWEOoqwOLj6p256kO3vOL7DIWl1cIgrobiof8v2bOigwPg=="></script>
+ </head>
+ <body data-template-id="__page-root">
+  <div class="app-shell" id="app-shell">
+   <div class="decor one"></div>
+   <div class="decor two"></div>
+   <div class="decor three"></div>
+   <main class="app-main" aria-live="polite">
+    <section id="home-view" class="view active" aria-labelledby="home-title">
+     <header class="pt-3 mb-5"><span data-template-id="home-eyebrow" class="canva-tag eyebrow"><i data-lucide="sparkles"></i></span>
+     </header>
+     <div class="welcome-illustration content-card mb-6"><img data-template-id="welcome-illustration" class="canva-image" loading="lazy">
+     </div>
+     <section data-template-id="welcome-panel" class="canva-panel content-card bg-white rounded-[28px] p-6">
+      <h1 id="home-title" data-template-id="welcome-title" class="canva-text display-font text-3xl leading-tight mb-3"></h1>
+      <p data-template-id="welcome-description" class="canva-text text-[0.96rem] leading-6 mb-6"></p><button id="start-learning" data-template-id="start-button" class="canva-button primary-btn pulse-btn" type="button"> <i data-lucide="rocket"></i> </button>
+     </section>
+     <aside data-template-id="home-tip" class="canva-banner mt-5 rounded-2xl px-4 py-3 bg-[#fff4c8] text-[#775e10] text-sm leading-5"></aside>
+    </section>
+    <section id="subjects-view" class="view" aria-labelledby="subjects-title">
+     <header class="section-heading">
+      <div><span data-template-id="subjects-eyebrow" class="canva-tag eyebrow"></span>
+       <h1 id="subjects-title" data-template-id="subjects-title" class="canva-text display-font text-3xl mt-3"></h1>
+      </div>
+     </header>
+     <p data-template-id="subjects-intro" class="canva-text text-sm leading-6 mb-5"></p>
+     <div class="subject-grid" aria-label="Senarai subjek KAFA"><button class="subject-card bg-[#dff5dd]" type="button" data-subject="Al-Quran"> <span class="subject-icon"><i data-lucide="book-open"></i></span> <span><strong>Al-Quran</strong><br>
+         Tilawah &amp; hafazan</span> </button> <button class="subject-card bg-[#fff0b8]" type="button" data-subject="Akidah"> <span class="subject-icon"><i data-lucide="heart-handshake"></i></span> <span><strong>Akidah</strong><br>
+         Iman &amp; sifat Allah</span> </button> <button class="subject-card bg-[#d8f2ff]" type="button" data-subject="Ibadah"> <span class="subject-icon"><i data-lucide="hand-heart"></i></span> <span><strong>Ibadah</strong><br>
+         Wuduk &amp; solat</span> </button> <button class="subject-card bg-[#f5e2ff]" type="button" data-subject="Sirah"> <span class="subject-icon"><i data-lucide="scroll-text"></i></span> <span><strong>Sirah</strong><br>
+         Kisah Rasulullah</span> </button> <button class="subject-card bg-[#ffe3db]" type="button" data-subject="Adab"> <span class="subject-icon"><i data-lucide="smile-plus"></i></span> <span><strong>Adab</strong><br>
+         Akhlak mulia</span> </button> <button class="subject-card bg-[#e3ece0]" type="button" data-subject="Jawi"> <span class="subject-icon"><i data-lucide="pen-tool"></i></span> <span><strong>Jawi</strong><br>
+         Baca &amp; tulis</span> </button> <button class="subject-card wide bg-[#e8f4df]" type="button" data-subject="Bahasa Arab"> <span class="subject-icon"><i data-lucide="languages"></i></span> <span><strong>Bahasa Arab</strong><br>
+         Kosa kata &amp; komunikasi asas</span> <i data-lucide="chevron-right"></i> </button>
+     </div>
+    </section>
+    <section id="levels-view" class="view" aria-labelledby="levels-title">
+     <header class="flex items-center gap-3 mb-5"><button id="back-to-subjects" class="soft-btn" type="button" aria-label="Kembali ke subjek"> <i data-lucide="arrow-left"></i> </button>
+      <div><span data-template-id="levels-eyebrow" class="canva-tag eyebrow"></span>
+       <h1 id="levels-title" class="display-font text-2xl font-bold mt-2">Pilih Tahun</h1>
+      </div>
+     </header>
+     <div data-template-id="levels-panel" class="canva-panel content-card bg-white rounded-[26px] p-5">
+      <p data-template-id="levels-description" class="canva-text text-sm leading-6 mb-5"></p>
+      <div class="year-list" id="year-list"></div>
+     </div>
+    </section>
+    <section id="lesson-view" class="view" aria-labelledby="lesson-title">
+     <header class="flex items-center gap-3 mb-5"><button id="back-to-levels" class="soft-btn" type="button" aria-label="Kembali ke pilihan tahun"> <i data-lucide="arrow-left"></i> </button>
+      <div><span data-template-id="lesson-eyebrow" class="canva-tag eyebrow"></span>
+       <p id="lesson-meta" class="text-xs font-extrabold text-[#59806a] mt-2"></p>
+      </div>
+     </header><!-- Sub-Tab Navigation for Al-Quran Subject -->
+     <div id="quran-sub-tabs" class="hidden flex gap-2 mb-4 p-1 bg-[#f0f7ef] rounded-xl">
+      <button id="tab-tajwid" class="flex-1 text-center py-2.5 px-3 rounded-lg text-xs font-bold transition-all" type="button">1. NOTA TAJWID (TEORI)</button> <button id="tab-hafazan" class="flex-1 text-center py-2.5 px-3 rounded-lg text-xs font-bold transition-all" type="button">2. HAFAZAN &amp; TILAWAH (AMALI)</button>
+     </div>
+     <article class="lesson-panel">
+      <h1 id="lesson-title" class="display-font text-2xl leading-tight font-bold"></h1>
+      <p id="lesson-summary" class="text-sm text-[#60796a] leading-6 mt-3"></p>
+      <div id="lesson-points" class="mt-5"></div>
+      <div id="lesson-tip" class="revision-tip"></div>
+     </article><button id="lesson-practice" data-template-id="lesson-practice-button" class="canva-button primary-btn mt-5" type="button"> <i data-lucide="circle-play"></i> </button>
+    </section>
+    <section id="practice-view" class="view" aria-labelledby="practice-title">
+     <header class="section-heading">
+      <div><span data-template-id="practice-eyebrow" class="canva-tag eyebrow"></span>
+       <h1 id="practice-title" data-template-id="practice-title" class="canva-text display-font text-3xl mt-3"></h1>
+      </div>
+     </header>
+     <div class="score-card">
+      <div>
+       <p data-template-id="score-label" class="canva-text text-xs uppercase tracking-[0.12em] font-extrabold text-[#4f7a5a] mb-1"></p>
+       <p id="score-summary" class="font-extrabold text-lg">0 / 0 betul</p>
+      </div>
+      <div id="score-circle" class="score-circle">
+       0%
+      </div>
+     </div>
+     <div id="practice-filters" class="filter-row" aria-label="Penapis subjek latihan"></div>
+     <div id="question-list"></div>
+    </section>
+    <section id="achievements-view" class="view" aria-labelledby="achievements-title">
+     <header class="section-heading">
+      <div><span data-template-id="achievements-eyebrow" class="canva-tag eyebrow"></span>
+       <h1 id="achievements-title" data-template-id="achievements-title" class="canva-text display-font text-3xl mt-3"></h1>
+      </div>
+     </header>
+     <section data-template-id="achievement-summary" class="canva-panel content-card bg-[#e8f6e6] rounded-[24px] p-5 mb-4">
+      <p data-template-id="achievement-summary-label" class="canva-text font-extrabold text-sm text-[#4d835c]"></p>
+      <p id="achievement-summary-text" class="display-font text-2xl font-bold mt-1"></p>
+      <div class="progress-track mt-4">
+       <div id="mastery-progress" class="progress-fill" style="width:0%"></div>
+      </div>
+     </section>
+     <div id="achievement-list"></div>
+    </section>
+    <section id="settings-view" class="view" aria-labelledby="settings-title">
+     <header class="section-heading">
+      <div><span data-template-id="settings-eyebrow" class="canva-tag eyebrow"></span>
+       <h1 id="settings-title" data-template-id="settings-title" class="canva-text display-font text-3xl mt-3"></h1>
+      </div>
+     </header>
+     <div class="setting-row">
+      <div>
+       <h2 data-template-id="reading-mode-title" class="canva-text font-extrabold text-sm"></h2>
+       <p data-template-id="reading-mode-description" class="canva-text text-xs leading-5 text-[#668072] mt-1"></p>
+      </div><button id="reading-mode-toggle" class="switch" type="button" role="switch" aria-checked="false" aria-label="Togol mod bacaan"> <span class="switch-dot"></span> </button>
+     </div>
+     <div class="setting-row">
+      <div>
+       <h2 data-template-id="reset-title" class="canva-text font-extrabold text-sm"></h2>
+       <p data-template-id="reset-description" class="canva-text text-xs leading-5 text-[#668072] mt-1"></p>
+      </div><button id="reset-session" class="soft-btn" type="button"><i data-lucide="rotate-ccw"></i></button>
+     </div>
+     <aside data-template-id="settings-note" class="canva-banner mt-5 rounded-2xl p-4 bg-[#dff2ff] text-[#347393] text-sm leading-6"></aside>
+    </section>
+   </main>
+   <nav class="bottom-nav" aria-label="Navigasi utama"><button class="nav-tab active" type="button" data-view="home-view" aria-label="Utama"> <i data-lucide="house"></i><span>UTAMA</span> </button> <button class="nav-tab" type="button" data-view="subjects-view" aria-label="Subjek"> <i data-lucide="book-marked"></i><span>SUBJEK</span> </button> <button class="nav-tab" type="button" data-view="practice-view" aria-label="Latihan"> <i data-lucide="brain"></i><span>LATIHAN</span> </button> <button class="nav-tab" type="button" data-view="achievements-view" aria-label="Pencapaian"> <i data-lucide="medal"></i><span>PENCAPAIAN</span> </button> <button class="nav-tab" type="button" data-view="settings-view" aria-label="Tetapan"> <i data-lucide="settings"></i><span>TETAPAN</span> </button>
+   </nav>
+  </div>
+  <script src="/_sdk/b7bbbe551ba4f8f5.editing_sdk.js" integrity="sha512-h06pMz6KcVo4Wjvoggb4sS5DZpb55bTriAzBmA0YwbkBA3z2ZXl8CBEbCWT+/fAsm0SwDejJ7jJHOZsLZKqPoQ=="></script>
+  <script>
+    const lessons = {
+      "Al-Quran": {
+        1: {
+          title: "Tajwid & Hafazan Tahun 1",
+          summary: "Sukatan Al-Quran & Tajwid JAKIM KAFA 2.0 untuk Tahun 1. Mengandungi Teori Tajwid Asas dan Amalan Hafazan.",
+          // Tab 1: Tajwid (Teori)
+          tajwidTitle: "Nota Tajwid (Teori) - Tahun 1",
+          tajwidSummary: "Asas memulakan bacaan dengan tertib melalui Istiadzah dan Basmalah.",
+          tajwidPoints: [
+            "<strong>Bab 1: Mengenal Istiadzah (إستعاذة)</strong><br>• Lafaz: <span class=\"font-semibold text-lg text-emerald-800\">\"أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ\"</span><br>• Maksud: \"Aku berlindung dengan Allah daripada syaitan yang direjam.\"<br>• Kepentingan: Memohon perlindungan Allah daripada gangguan syaitan semasa membaca Al-Quran.",
+            "<strong>Bab 2: Mengenal Basmalah (بسملة)</strong><br>• Lafaz: <span class=\"font-semibold text-lg text-emerald-800\">\"بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّجِيمِ\"</span><br>• Maksud: \"Dengan nama Allah Yang Maha Pemurah lagi Maha Penyayang.\"<br>• Amalan: Digalakkan dibaca pada permulaan setiap surah kecuali Surah At-Tawbah.",
+            "<strong>Hukum Membaca Istiadzah & Basmalah:</strong><br>• Hukum membaca kedua-duanya adalah <strong>Sunat</strong> dibaca sebelum memulakan bacaan Al-Quran bagi menjaga adab dan memperoleh keberkatan."
+          ],
+          tajwidTip: "Biasakan melafazkan Taawuz dan Basmalah dengan makhraj huruf yang fasih dan jelas sebelum mengaji.",
+          
+          // Tab 2: Hafazan & Tilawah (Amali)
+          hafazanTitle: "Hafazan & Tilawah (Amali) - Tahun 1",
+          hafazanSummary: "Sasaran hafazan surah-surah pendek untuk amalan solat harian.",
+          hafazanPoints: [
+            "<strong>1. Surah Al-Fatihah (الفاتحة) - 7 Ayat:</strong> Surah wajib dalam setiap rakaat solat. Murid wajib menghafal dengan lancar mengikut hukum tajwid asas.",
+            "<strong>2. Surah Al-Ikhlas (الإخلاص) - 4 Ayat:</strong> Menjelaskan tentang keesaan Allah SWT. Sangat dituntut untuk diamalkan setiap hari.",
+            "<strong>3. Surah Al-Falaq (الفلق) - 5 Ayat:</strong> Memohon perlindungan Allah daripada kejahatan makhluk di waktu malam.",
+            "<strong>4. Surah An-Nas (الناس) - 6 Ayat:</strong> Memohon perlindungan Allah daripada bisikan syaitan dalam dada manusia.",
+            "<strong>Panduan Amali:</strong> Murid perlulah memperdengarkan bacaan (tasmi') kepada guru/ibu bapa untuk memastikan makhraj huruf asas (seperti sebutan huruf ص, ض, ط, ظ) dibunyikan dengan betul."
+          ],
+          hafazanTip: "Ulang hafazan surah-surah ini sebanyak 3 kali setiap kali selepas menunaikan solat fardu."
+        },
+        2: {
+          title: "Tajwid & Hafazan Tahun 2",
+          summary: "Sukatan Al-Quran & Tajwid JAKIM KAFA 2.0 untuk Tahun 2. Memfokuskan kepada Tanda Waqaf dan Surah-surah Amali.",
+          // Tab 1: Tajwid (Teori)
+          tajwidTitle: "Nota Tajwid (Teori) - Tahun 2",
+          tajwidSummary: "Mempelajari cara berhenti bacaan dengan betul menggunakan Tanda Waqaf.",
+          tajwidPoints: [
+            "<strong>Apakah itu Waqaf (واقف)?</strong><br>• <em>Pengertian</em>: Menghentikan bacaan seketika pada akhir kalimah atau di pertengahannya untuk mengambil nafas dengan niat menyambung semula bacaan Al-Quran.",
+            "<strong>Kenali Tanda Waqaf Utama (تندا واقف):</strong><br>" +
+            "• <strong>Waqaf Lazim (م):</strong> Wajib berhenti (واجب برهنتي). Sangat penting untuk mengelakkan perubahan makna ayat.<br>" +
+            "• <strong>Waqaf Mutlaq (ط):</strong> Lebih baik berhenti (لبيه باءيق برهنتي). Memberikan jeda yang sempurna pada struktur ayat.<br>" +
+            "• <strong>Waqaf Jaiz (ج):</strong> Harus berhenti atau sambung (هاروس برهنتي اتاو سامبوڠ). Kedua-dua pilihan adalah sama baik.<br>" +
+            "• <strong>Tanda La Waqaf (لا):</strong> Dilarang berhenti (دلارڠ برهنتي). Jika terhenti kerana sesak nafas, wajib mengulangi perkataan sebelumnya."
+          ],
+          tajwidTip: "Sentiasa perhatikan tanda huruf kecil seperti (م) atau (ج) di atas ayat Al-Quran semasa mengaji.",
+          
+          // Tab 2: Hafazan & Tilawah (Amali)
+          hafazanTitle: "Hafazan & Tilawah (Amali) - Tahun 2",
+          hafazanSummary: "Senarai surah sasaran hafazan untuk murid Tahun 2.",
+          hafazanPoints: [
+            "<strong>1. Surah Al-Masad (المسد) - 5 Ayat:</strong> Menceritakan balasan buruk terhadap Abu Lahab dan isterinya yang menentang dakwah Nabi.",
+            "<strong>2. Surah An-Nasr (النصر) - 3 Ayat:</strong> Khabar gembira tentang pertolongan Allah dan kemenangan Islam.",
+            "<strong>3. Surah Al-Kafirun (الكافرون) - 6 Ayat:</strong> Penegasan keteguhan akidah Islam terhadap agama lain.",
+            "<strong>4. Surah Al-Kautsar (الكوثر) - 3 Ayat:</strong> Penjelasan nikmat yang melimpah-ruah yang Allah berikan kepada Nabi Muhammad SAW.",
+            "<strong>5. Surah Al-Ma'un (الماعون) - 7 Ayat:</strong> Menyebut sifat-sifat pendusta agama yang melalaikan solat dan menghardik anak yatim."
+          ],
+          hafazanTip: "Fahami makna ringkas setiap surah untuk membantu menguatkan daya ingatan hafazan anda."
+        },
+        3: {
+          title: "Tajwid & Hafazan Tahun 3",
+          summary: "Sukatan Al-Quran & Tajwid JAKIM KAFA 2.0 untuk Tahun 3. Mempelajari Hukum Nun Sakinah & Tanwin secara menyeluruh.",
+          // Tab 1: Tajwid (Teori)
+          tajwidTitle: "Nota Tajwid (Teori) - Tahun 3",
+          tajwidSummary: "Menguasai 4 hukum utama apabila Nun Mati (نْ) atau Tanwin (ً ٍ ٌ) bertemu huruf hijaiyyah.",
+          tajwidPoints: [
+            "<strong>1. Izhar Halqi (إِظْهَار حَلْقِي):</strong><br>• <em>Cara Bacaan</em>: Membaca bunyi Nun Mati dengan jelas, terang, dan tanpa dengung.<br>• <em>Enam Huruf</em>: (أ ، هـ ، ع ، ح ، غ ، kh)<br>• <em>Contoh</em>: <span class=\"font-semibold text-emerald-800\">مِنْ خَوْفٍ</span> , <span class=\"font-semibold text-emerald-800\">أَنْعَمْتَ</span>.",
+            "<strong>2. Idgham (إِدْغَام) - Terbahagi kepada 2 Bahagian:</strong><br>" +
+            "• <strong>Idgham Maal Ghunnah (مع الغنة):</strong> Memasukkan bunyi Nun Mati dengan dengung 2 harakat. Hurufnya: (ي ، و ، m , ن). Contoh: <span class=\"font-semibold text-emerald-800\">مَن يَقُولُ</span> , <span class=\"font-semibold text-emerald-800\">مِنْ وَرَائِهِمْ</span>.<br>" +
+            "• <strong>Idgham Bila Ghunnah (بلا غنة):</strong> Memasukkan bunyi Nun Mati tanpa sebarang dengung. Hurufnya: (ل ، ر). Contoh: <span class=\"font-semibold text-emerald-800\">مِنْ لَدُنْهُ</span> , <span class=\"font-semibold text-emerald-800\">غَفُورٌ رَحِيمٌ</span>.",
+            "<strong>3. Iqlab (إِقْلَاب):</strong><br>• <em>Cara Bacaan</em>: Menukar bunyi Nun Mati atau Tanwin menjadi bunyi Mim (م) berserta dengung yang rapat.<br>• <em>Satu Huruf sahaja</em>: (ب)<br>• <em>Contoh</em>: <span class=\"font-semibold text-emerald-800\">مِنْ بَعْدِ</span>.",
+            "<strong>4. Ikhfa' Haqiqi (إِخْفَاء حَقِيقِي):</strong><br>• <em>Cara Bacaan</em>: Menyembunyikan bunyi Nun Mati atau Tanwin (bunyi samar-samar berserta dengung 2 harakat).<br>• <em>15 Huruf Baki</em>: (ت, ث, ج, د, ذ, ز, س, ش, ص, ض, ط, ظ, ف, ق, ك)<br>• <em>Contoh</em>: <span class=\"font-semibold text-emerald-800\">مِنْ دُونِ</span> , <span class=\"font-semibold text-emerald-800\">أَنْفُسَكُمْ</span>."
+          ],
+          tajwidTip: "Dengungkan bacaan bagi hukum Idgham Maal Ghunnah, Iqlab, dan Ikhfa'. Pastikan Izhar dibaca jelas tanpa dengung.",
+          
+          // Tab 2: Hafazan & Tilawah (Amali)
+          hafazanTitle: "Hafazan & Tilawah (Amali) - Tahun 3",
+          hafazanSummary: "Surah-surah lazim pilihan untuk hafazan Tahun 3.",
+          hafazanPoints: [
+            "<strong>1. Surah Quraisy (قريش) - 4 Ayat:</strong> Mengisahkan tentang kehidupan, keamanan dan kebiasaan perdagangan suku Quraisy.",
+            "<strong>2. Surah Al-Fil (الفيل) - 5 Ayat:</strong> Mengisahkan kemusnahan tentera bergajah Abrahah yang ingin meruntuhkan Kaabah.",
+            "<strong>3. Surah Al-Humazah (الهمزة) - 9 Ayat:</strong> Ancaman azab bagi pengumpat, pencela, dan orang yang tamak mengumpul harta.",
+            "<strong>4. Surah Al-Asr (العصر) - 3 Ayat:</strong> Menjelaskan tentang nilai masa dan kerugian manusia kecuali mereka yang beriman dan beramal soleh."
+          ],
+          hafazanTip: "Minta bantuan rakan kelas untuk saling menyemak (tasmi') hafazan bagi menguji kelancaran."
+        },
+        4: {
+          title: "Tajwid & Hafazan Tahun 4",
+          summary: "Sukatan Al-Quran & Tajwid JAKIM KAFA 2.0 untuk Tahun 4. Topik wajib peperiksaan UPKK: Mim Sakinah & Qalqalah.",
+          // Tab 1: Tajwid (Teori)
+          tajwidTitle: "Nota Tajwid (Teori) - Tahun 4",
+          tajwidSummary: "Pembelajaran intensif Mim Mati dan hukum lantunan Qalqalah yang mempunyai markah tinggi dalam UPKK.",
+          tajwidPoints: [
+            "<strong>1. Hukum Mim Sakinah / Mim Mati (حكوم ميم ساكنة):</strong><br>" +
+            "• <strong>Ikhfa' Syafawi (إِخْفَاء شَفَوِي):</strong> Menyembunyikan sebutan Mim Mati di bibir berserta dengung apabila bertemu huruf Ba (ب). Contoh: <span class=\"font-semibold text-emerald-800\">تَرْمِيهِمْ بِحِجَارَةٍ</span>.<br>" +
+            "• <strong>Idgham Mithlain / Syafawi (إدغام مثلين):</strong> Memasukkan Mim Mati ke dalam huruf Mim berikutnya berserta dengung sempurna. Contoh: <span class=\"font-semibold text-emerald-800\">لَكُمْ مَا كَسَبْتُمْ</span>.<br>" +
+            "• <strong>Izhar Syafawi (إِظْهَار شَفَوِي):</strong> Membaca Mim Mati secara jelas dan nyata tanpa dengung apabila bertemu semua huruf hijaiyyah selain Mim (م) dan Ba (ب). Contoh: <span class=\"font-semibold text-emerald-800\">أَلَمْ تَرَ</span> , <span class=\"font-semibold text-emerald-800\">أَنْعَمْتَ</span>.",
+            "<strong>2. Hukum Qalqalah (حكوم قلقلة):</strong><br>" +
+            "• <em>Pengertian</em>: Bunyi lantunan atau pantulan suara apabila menyebut huruf Qalqalah yang berbaris MATI (sukun) atau dihentikan (waqaf).<br>" +
+            "• <em>Lima Huruf Qalqalah</em>: (ق ، ط ، ب ، ج ، د) - disingkatkan sebagai [قُطْبُ جَدٍّ].<br>" +
+            "• <strong>Qalqalah Sughra (صغرى - Lantunan Kecil):</strong> Huruf qalqalah mati asli di tengah-tengah kalimah. Bunyi pantulan dibaca nipis. Contoh: <span class=\"font-semibold text-emerald-800\">يَقْطَعُونَ</span> , <span class=\"font-semibold text-emerald-800\">يَبْتَغُونَ</span>.<br>" +
+            "• <strong>Qalqalah Kubra (كبرى - Lantunan Besar):</strong> Huruf qalqalah mati di akhir kalimah kerana waqaf (berhenti). Bunyi pantulan dibaca lebih tebal dan kuat. Contoh: <span class=\"font-semibold text-emerald-800\">الْفَلَقِ</span> , <span class=\"font-semibold text-emerald-800\">شَدِيدٌ</span>."
+          ],
+          tajwidTip: "Dalam peperiksaan UPKK, pastikan anda dapat membezakan sebutan lantunan di tengah ayat (Sughra) dan di akhir ayat (Kubra).",
+          
+          // Tab 2: Hafazan & Tilawah (Amali)
+          hafazanTitle: "Hafazan & Tilawah (Amali) - Tahun 4",
+          hafazanSummary: "Surah-surah wajib dihafal mengikut silabus Tahun 4 JAKIM.",
+          hafazanPoints: [
+            "<strong>1. Surah At-Takathur (التكاثر) - 8 Ayat:</strong> Amaran tentang kelalaian manusia akibat sibuk mengumpul harta dunia.",
+            "<strong>2. Surah Al-Qari'ah (القارعة) - 11 Ayat:</strong> Gambaran tentang kedahsyatan peristiwa Hari Kiamat dan timbangan amalan manusia.",
+            "<strong>3. Surah Al-Adiyat (العاديات) - 11 Ayat:</strong> Menceritakan tentang sifat manusia yang tidak bersyukur dan gopoh.",
+            "<strong>4. Surah Az-Zalzalah (الزلزلة) - 8 Ayat:</strong> Peristiwa bumi digoncangkan pada hari kiamat dan pendedahan segala amalan sekecil zarah."
+          ],
+          hafazanTip: "Membaca surah-surah ini dalam solat fardu secara bergilir-gilir sangat berkesan untuk mengekalkan ingatan."
+        },
+        5: {
+          title: "Tajwid & Hafazan Tahun 5",
+          summary: "Sukatan Al-Quran & Tajwid JAKIM KAFA 2.0 untuk Tahun 5. Topik utama UPKK: Hukum Mad Asli dan Mad Far'i.",
+          // Tab 1: Tajwid (Teori)
+          tajwidTitle: "Nota Tajwid (Teori) - Tahun 5",
+          tajwidSummary: "Penguasaan mendalam tajwid bahagian Hukum Mad (pemanjangan suara).",
+          tajwidPoints: [
+            "<strong>Pengertian Mad (مد):</strong> Memanjangkan kadar suara ketika membaca huruf Mad. Huruf Mad ada 3 iaitu Alif (ا), Wau (و), dan Ya (ي).",
+            "<strong>1. Mad Asli / Tabi'i (مد أصلي):</strong><br>• Kadar pemanjangan bunyi adalah <strong>2 harakat</strong> secara mutlak. Contoh: <span class=\"font-semibold text-emerald-800\">قَالُوا</span> , <span class=\"font-semibold text-emerald-800\">نُوحِيهَا</span>.",
+            "<strong>2. Mad Far'i (مد فرعي) - Pecahan Hukum Pemanjangan Cawangan:</strong><br>" +
+            "• <strong>Mad Wajib Muttasil (مد wajib متصل):</strong> Apabila huruf Mad bertemu dengan huruf Hamzah (ء) dalam <strong>SATU kalimah</strong> yang sama. Kadar panjang: 4 hingga 5 harakat. Contoh: <span class=\"font-semibold text-emerald-800\">جَاءَ</span> , <span class=\"font-semibold text-emerald-800\">السَّمَاءِ</span>.<br>" +
+            "• <strong>Mad Jaiz Munfasil (مد جائز منفصل):</strong> Apabila huruf Mad bertemu dengan huruf Hamzah (ء) dalam <strong>DUA kalimah</strong> yang berbeza. Kadar panjang: 4 hingga 5 harakat. Contoh: <span class=\"font-semibold text-emerald-800\">بِمَا أُنْزِلَ</span> , <span class=\"font-semibold text-emerald-800\">يَا أَيُّهَا</span>.<br>" +
+            "• <strong>Mad 'Aridh Lissukun (مد عارض للسكون):</strong> Apabila huruf Mad berada sebelum huruf terakhir dalam sesuatu kalimah dan dibaca secara waqaf (berhenti). Kadar panjang: Boleh dibaca 2, 4, atau 6 harakat. Contoh: <span class=\"font-semibold text-emerald-800\">الْعَالَمِينَ</span> , <span class=\"font-semibold text-emerald-800\">تَعْمَلُونَ</span>."
+          ],
+          tajwidTip: "Mad Wajib Muttasil bermaksud bersambung (satu kalimah), manakala Mad Jaiz bermaksud berpisah (dua kalimah). Ini formula paling mudah untuk peperiksaan!",
+          
+          // Tab 2: Hafazan & Tilawah (Amali)
+          hafazanTitle: "Hafazan & Tilawah (Amali) - Tahun 5",
+          hafazanSummary: "Ulang kaji hafazan surah-surah panjang di Tahun 5.",
+          hafazanPoints: [
+            "<strong>1. Surah Al-Bayyinah (البينة) - 8 Ayat:</strong> Penjelasan yang nyata tentang bukti-bukti kebenaran ajaran Islam.",
+            "<strong>2. Surah Al-Qadr (القدر) - 5 Ayat:</strong> Keagungan malam Lailatul Qadar yang lebih baik daripada seribu bulan.",
+            "<strong>3. Surah Al-Alaq (العلق) - 19 Ayat:</strong> Mengandungi 5 ayat terawal wahyu pertama yang diturunkan kepada Nabi Muhammad SAW.",
+            "<strong>4. Surah At-Tin (التين) - 8 Ayat:</strong> Sumpah Allah demi buah tin dan zaitun, membuktikan manusia diciptakan dengan sebaik-baik bentuk.",
+            "<strong>5. Surah Al-Inshirah / Asy-Syarh (الشرح) - 8 Ayat:</strong> Jaminan kelapangan dada dan kemudahan yang Allah berikan selepas setiap kesukaran."
+          ],
+          hafazanTip: "Kerana surah-surah Tahun 5 lebih panjang, bahagikan hafazan kepada 2 ayat sehari untuk penguasaan yang konsisten."
+        }
+      },
+      "Akidah": {
+        1: {
+          title: "Mengenal Allah SWT (الْخَالِقُ), Kalimah Syahadah (كَلِمَةُ الشَّهَادَةِ) & Rukun Iman",
+          summary: "Ulang kaji lengkap Akidah Islam bagi Tahun 1 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM.",
+          points: [
+            "<strong>1. Mengenal Allah Sebagai Al-Khaliq (الْخَالِقُ):</strong><br>• <em>Pengertian Al-Khaliq</em>: Allah SWT Maha Pencipta sekalian alam dan segala isi kandungan di dalamnya.<br>• <em>Alam Musyahadah (عَالَم مُشَاهَدَة - Alam nyata)</em>: Manusia boleh melihat dan merasai kebesaran Allah melalui ciptaan-Nya yang nyata seperti manusia (مَأْنُوسِيَا), haiwan (حيوان), tumbuh-tumbuhan (تومبوه٢ن), gunung-ganang, dan sungai.<br>• <em>Ciptaan Allah di langit dan bumi</em>: Matahari (ماتاهاري), bulan (بولن), bintang (بينتڠ), awan, dan hujan. Bukti akal menunjukkan setiap ciptaan pasti ada penciptanya yang Agung.",
+            "<strong>2. Kalimah Syahadah (كَلِمَةُ الشَّهَادَةِ):</strong><br>• <em>Lafaz Syahadah</em>: <span class=\"font-semibold text-emerald-800\">\"أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ\"</span><br>• <em>Makna Kalimah Syahadah</em>: \"Aku bersaksi bahawa tiada Tuhan yang disembah melainkan Allah, dan aku bersaksi bahawa Nabi Muhammad itu utusan Allah.\"<br>• <em>Pembahagian Syahadah (Dua Bahagian)</em>:<br>&nbsp;&nbsp;1. <strong>Syahadah Tauhid (شَهَادَة تَوْحِيد):</strong> Penyaksian keesaan Allah, iaitu lafaz <span class=\"font-semibold text-emerald-800\">\"أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ\"</span>.<br>&nbsp;&nbsp;2. <strong>Syahadah Rasul (شَهَادَة رَسُول):</strong> Penyaksian kerasulan Nabi Muhammad, iaitu lafaz <span class=\"font-semibold text-emerald-800\">\"وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ\"</span>.<br>• <em>Tuntutan Bersyahadah</em>: Sentiasa mentaati perintah Allah dan menjauhi larangan-Nya, serta menjadikan Nabi Muhammad SAW sebagai contoh teladan terbaik dalam kehidupan seharian.",
+            "<strong>3. Rukun Iman (روكون ايمان - 6 Perkara):</strong><br>• <em>Pengertian Iman</em>: Membenarkan di dalam hati (تصديق بالقلب), mengikrarkan dengan lidah (اقرار باللسان), dan mengamalkannya dengan anggota badan (عمل بالأركان).<br>• <em>Enam Rukun Iman yang wajib dihafal secara tertib</em>:<br>" +
+            "&nbsp;&nbsp;1. Beriman kepada Allah (ايمان كڤد الله).<br>" +
+            "&nbsp;&nbsp;2. Beriman kepada Malaikat (ايمان كڤد ملائكة).<br>" +
+            "&nbsp;&nbsp;3. Beriman kepada Kitab (ايمان كڤد كتاب).<br>" +
+            "&nbsp;&nbsp;4. Beriman kepada Rasul (ايمان كڤد رسول).<br>" +
+            "&nbsp;&nbsp;5. Beriman kepada Hari Akhirat (ايمان كڤد هاري اخيرة).<br>" +
+            "&nbsp;&nbsp;6. Beriman kepada Qada' dan Qadar (ايمان كڤد قضاء دان قدر)."
+          ],
+          tip: "Hafaz dan fahami makna dua bahagian Kalimah Syahadah serta turutan Rukun Iman dengan betul."
+        },
+        2: {
+          title: "Sifat Wajib Allah (صِفَات وَاجِب الله) & Sifat Mustahil (صِفَات مُسْتَحِيل)",
+          summary: "Kefahaman 6 Sifat Wajib pertama serta Sifat Mustahil yang menjadi lawannya mengikut silibus Tahun 2 JAKIM.",
+          points: [
+            "<strong>1. Pengertian Sifat Wajib Allah:</strong> Sifat yang semestinya ada pada zat Allah SWT. Setiap umat Islam wajib mempercayai dan mengimani sifat-sifat keagungan ini.",
+            "<strong>2. Enam Sifat Wajib Pertama (Sifat Nafsiah & Salbiah):</strong><br>" +
+            "• <strong>Wujud (وُجُود)</strong> - <em>Artinya: Ada (اد)</em>. Lawannya: 'Adam (عَدَمْ - Tiada). Bukti aqli: Kewujudan alam semesta yang indah ini membuktikan ada Pencipta yang Maha Kuasa.<br>" +
+            "• <strong>Qidam (قِدَمْ)</strong> - <em>Artinya: Sedia ada / Terdahulu (سديا اد)</em>. Lawannya: Huduth (حُدُوثْ - Baharu). Zat Allah tiada permulaan bagi kewujudan-Nya.<br>" +
+            "• <strong>Baqa' (بَقَاءْ)</strong> - <em>Artinya: Kekal (ككل)</em>. Lawannya: Fana' (فَنَاءْ - Binasa). Seluruh makhluk di alam ini akan hancur dan binasa melainkan Allah yang kekal abadi.<br>" +
+            "• <strong>Mukhalafatuhu lilhawadith (مُخَالَفَتُهُ لِلْحَوَادِثِ)</strong> - <em>Artinya: Bersalahan Allah dengan segala yang baharu (برصالهن دڠن بندا بهارو)</em>. Lawannya: Mumathalatuhu lilhawadith (مُمَاثَلَتُهُ لِلْحَوَادِثِ - Menyerupai makhluk). Allah tidak mempunyai bentuk, rupa, saiz, jantina, atau tempat.<br>" +
+            "• <strong>Qiyamuhu binafsih (قِيَامُهُ بِنَفْسِهِ)</strong> - <em>Artinya: Allah berdiri dengan sendiri-Nya (برديري دڠن سنديريث)</em>. Lawannya: Qiyamuhu bighairih (قِيَامُهُ بِغَيْرِهِ - Berdiri-Nya dengan yang lain). Allah tidak memerlukan pertolongan atau bantuan sesiapa pun.<br>" +
+            "• <strong>Wahdaniyyah (وَحْدَانِيَّة)</strong> - <em>Artinya: Esa / Tunggal (ايسا)</em>. Lawannya: Ta'addud (تَعَدُّدْ - Berbilang-bilang). Allah Maha Esa pada Zat, Sifat, dan segala Perbuatan-Nya.",
+            "<strong>3. Sifat Mustahil bagi Allah (صِفَات مُسْتَحِيل باڬي الله):</strong><br>Pengertian: Sifat yang tidak masuk akal sama sekali untuk ada pada zat Allah yang Maha Agung. Sifat mustahil ini merupakan lawan (لاون) secara langsung bagi sifat wajib:<br>" +
+            "• Lawan bagi <strong>Wujud</strong> ialah <strong>'Adam (عَدَمْ)</strong> bermaksud tiada (تيدق اد).<br>" +
+            "• Lawan bagi <strong>Qidam</strong> ialah <strong>Huduth (حُدُوثْ)</strong> bermaksud baharu (بهارو).<br>" +
+            "• Lawan bagi <strong>Baqa'</strong> ialah <strong>Fana' (فَنَاءْ)</strong> bermaksud binasa (بيناسا).<br>" +
+            "• Lawan bagi <strong>Mukhalafatuhu lilhawadith</strong> ialah <strong>Mumathalatuhu lilhawadith (مُمَاثَلَتُهُ لِلْحَوَادِثِ)</strong> bermaksud menyerupai benda baharu.<br>" +
+            "• Lawan bagi <strong>Qiyamuhu binafsih</strong> ialah <strong>Qiyamuhu bighairih (قِيَامُهُ بِغَيْرِهِ)</strong> bermaksud berdiri dengan yang lain.<br>" +
+            "• Lawan bagi <strong>Wahdaniyyah</strong> ialah <strong>Ta'addud (تَعَدُّدْ)</strong> bermaksud berbilang-bilang."
+          ],
+          tip: "Padankan setiap sifat wajib dengan sifat mustahil yang menjadi lawannya untuk memudahkan pemahaman dan ingatan ulang kaji."
+        },
+        3: {
+          title: "Sifat Wajib (Ma'ani), Sifat Jaiz & Kesan Beriman",
+          summary: "Ulap kaji lengkap Akidah Islam bagi Tahun 3 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM.",
+          points: [
+            "<strong>1. Sifat Wajib Allah (صِفَات وَاجِب الله) - Sambungan Sifat Ma'ani (7 Sifat):</strong><br>" +
+            "• <strong>Qudrah (قُدْرَة)</strong> - <em>Artinya: Berkuasa (بركواسا)</em>. Lawannya: 'Ajzun (عَجْزٌ - Lemah). Allah berkuasa mutlak mencipta dan mentadbir seluruh alam semesta tanpa batas.<br>" +
+            "• <strong>Iradah (إِرَادَة)</strong> - <em>Artinya: Berkehendak (بركهندق)</em>. Lawannya: Karahah (كَرَاهَةٌ - Terpaksa). Setiap perkara yang berlaku di dunia ini adalah atas kehendak dan ketentuan Allah semata-mana.<br>" +
+            "• <strong>'Ilmun (عِلْمٌ)</strong> - <em>Artinya: Mengetahui (مڠتاهوءي)</em>. Lawannya: Jahlun (جَهْلٌ - Jahil/Bodoh). Pengetahuan Allah meliputi segala perkara yang nyata, yang tersembunyi, yang telah berlaku, dan yang akan berlaku.<br>" +
+            "• <strong>Hayat (حَيَاة)</strong> - <em>Artinya: Hidup (هيدوڤ)</em>. Lawannya: Mautun (مَوْتٌ - Mati). Allah Maha Hidup selama-lamanya dan tidak mengantuk atau tidur.<br>" +
+            "• <strong>Sama' (سَمْعٌ)</strong> - <em>Artinya: Mendengar (مڠدڠر)</em>. Lawannya: Summun (صُمٌّ - Pekak). Allah mendengar segala bunyi dan bisikan, walaupun suara hati makhluk di dasar laut yang gelap.<br>" +
+            "• <strong>Basar (بَصَرٌ)</strong> - <em>Artinya: Melihat (مليهت)</em>. Lawannya: 'Umyun (عُمْيٌ - Buta). Penglihatan Allah sangat terang dan tidak memerlukan alat bantuan atau cahaya.<br>" +
+            "• <strong>Kalam (كَلَامٌ)</strong> - <em>Artinya: Berkata-kata (بركات-كات)</em>. Lawannya: Bukmun (بُكْمٌ - Bisu). Allah berkata-kata melalui wahyu-Nya (seperti Al-Quran) tanpa memerlukan suara, huruf, atau bahasa seperti makhluk.",
+            "<strong>2. Sifat Jaiz bagi Allah SWT (صِفَات جَائِز باڬي الله):</strong><br>" +
+            "• <em>Pengertian Sifat Jaiz</em>: Sifat yang HARUS (هاروس) bagi Allah SWT untuk melakukannya atau meninggalkannya.<br>" +
+            "• Sifat Jaiz Allah hanya ada <strong>SATU (1)</strong> sahaja iaitu:<br>" +
+            "&nbsp;&nbsp;<span class=\"font-semibold text-emerald-800\">\"فِعْلُ كُلِّ مُمْكِنٍ أَوْ تَرْكُهُ\"</span> (Fi'lu kulli mumkinin aw tarkuhu).<br>" +
+            "• <em>Artinya</em>: Harus bagi Allah membuat sesuatu perkara yang harus (makhluk) atau tidak membuatnya mengikut kebijaksanaan dan kehendak-Nya sendiri. Contoh: Harus bagi Allah menghidupkan seseorang atau mematikannya.",
+            "<strong>3. Kesan Beriman kepada Sifat 20 Allah (كسن بريـمان كڤd صفة 20):</strong><br>" +
+            "• Membina rasa takut untuk melakukan dosa kerana tahu Allah Maha Melihat (Basar) dan Maha Mendengar (Sama').<br>" +
+            "• Mendidik jiwa sentiasa bersyukur dan merendah diri (tawaduk) kerana sedar semua kekuatan adalah milik Allah (Qudrah).<br>" +
+            "• Rajin menuntut ilmu kerana mengagumi sifat ilmu Allah ('Ilmun).<br>" +
+            "• Sentiasa berdoa dan bertawakal kepada Allah dalam setiap urusan kehidupan seharian murid."
+          ],
+          tip: "Hafaz 7 Sifat Ma'ani berserta maknanya dan fahami bahawa Allah hanya mempunyai satu Sifat Jaiz sahaja."
+        },
+        3: {
+          title: "Sifat Wajib (Ma'ani), Sifat Jaiz & Kesan Beriman",
+          summary: "Ulap kaji lengkap Akidah Islam bagi Tahun 3 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM.",
+          points: [
+            "<strong>1. Sifat Wajib Allah (صِفَات وَاجِب الله) - Sambungan Sifat Ma'ani (7 Sifat):</strong><br>" +
+            "• <strong>Qudrah (قُدْرَة)</strong> - <em>Artinya: Berkuasa (بركواسا)</em>. Lawannya: 'Ajzun (عَجْزٌ - Lemah). Allah berkuasa mutlak mencipta dan mentadbir seluruh alam semesta tanpa batas.<br>" +
+            "• <strong>Iradah (إِرَادَة)</strong> - <em>Artinya: Berkehendak (بركهندق)</em>. Lawannya: Karahah (كَرَاهَةٌ - Terpaksa). Setiap perkara yang berlaku di dunia ini adalah atas kehendak dan ketentuan Allah semata-mana.<br>" +
+            "• <strong>'Ilmun (عِلْمٌ)</strong> - <em>Artinya: Mengetahui (مڠتاهوءi)</em>. Lawannya: Jahlun (جَهْلٌ - Jahil/Bodoh). Pengetahuan Allah meliputi segala perkara yang nyata, yang tersembunyi, yang telah berlaku, dan yang akan berlaku.<br>" +
+            "• <strong>Hayat (حَيَاة)</strong> - <em>Artinya: Hidup (هيدوڤ)</em>. Lawannya: Mautun (مَوْتٌ - Mati). Allah Maha Hidup selama-lamanya dan tidak mengantuk atau tidur.<br>" +
+            "• <strong>Sama' (سَمْعٌ)</strong> - <em>Artinya: Mendengar (مڠدڠر)</em>. Lawannya: Summun (صُمٌّ - Pekak). Allah mendengar segala bunyi dan bisikan, walaupun suara hati makhluk di dasar laut yang gelap.<br>" +
+            "• <strong>Basar (بَصَرٌ)</strong> - <em>Artinya: Melihat (مليهt)</em>. Lawannya: 'Umyun (عُمْيٌ - Buta). Penglihatan Allah sangat terang dan tidak memerlukan alat bantuan atau cahaya.<br>" +
+            "• <strong>Kalam (كَلَامٌ)</strong> - <em>Artinya: Berkata-kata (بركات-كات)</em>. Lawannya: Bukmun (بُكْمٌ - Bisu). Allah berkata-kata melalui wahyu-Nya (seperti Al-Quran) tanpa memerlukan suara, huruf, atau bahasa seperti makhluk.",
+            "<strong>2. Sifat Jaiz bagi Allah SWT (صِفَات جَائِز باڬي الله):</strong><br>" +
+            "• <em>Pengertian Sifat Jaiz</em>: Sifat yang HARUS (هاروس) bagi Allah SWT untuk melakukannya atau meninggalkannya.<br>" +
+            "• Sifat Jaiz Allah hanya ada <strong>SATU (1)</strong> sahaja iaitu:<br>" +
+            "&nbsp;&nbsp;<span class=\"font-semibold text-emerald-800\">\"فِعْلُ كُلِّ مُمْكِنٍ أَوْ تَرْكُهُ\"</span> (Fi'lu kulli mumkinin aw tarkuhu).<br>" +
+            "• <em>Artinya</em>: Harus bagi Allah membuat sesuatu perkara yang harus (makhluk) atau tidak membuatnya mengikut kebijaksanaan dan kehendak-Nya sendiri. Contoh: Harus bagi Allah menghidupkan seseorang atau mematikannya.",
+            "<strong>3. Kesan Beriman kepada Sifat 20 Allah (كسن بريـمان كڤd صفة 20):</strong><br>" +
+            "• Membina rasa takut untuk melakukan dosa kerana tahu Allah Maha Melihat (Basar) and Maha Mendengar (Sama').<br>" +
+            "• Mendidik jiwa sentiasa bersyukur dan merendah diri (tawaduk) kerana sedar semua kekuatan adalah milik Allah (Qudrah).<br>" +
+            "• Rajin menuntut ilmu kerana mengagumi sifat ilmu Allah ('Ilmun).<br>" +
+            "• Sentiasa berdoa dan bertawakal kepada Allah dalam setiap urusan kehidupan seharian murid."
+          ],
+          tip: "Hafaz 7 Sifat Ma'ani berserta maknanya dan fahami bahawa Allah hanya mempunyai satu Sifat Jaiz sahaja."
+        },
+        4: {
+          title: "Beriman kepada Kitab (إِيـمَان كڤد كتاب) & Beriman kepada Rasul (إِيـمَان كڤد رسول)",
+          summary: "Ulang kaji intensif Akidah Tahun 4 (UPKK): Kepentingan rujukan wahyu samawi & rantaian kepimpinan para utusan Allah.",
+          points: [
+            "<strong>1. Beriman kepada Kitab (إِيـمَان كڤد كتاب):</strong><br>" +
+            "• <em>Pengertian Kitab</em>: Kalam Allah SWT yang diwahyukan kepada para Nabi dan Rasul untuk menjadi panduan hidup yang lengkap bagi seluruh manusia.<br>" +
+            "• <strong>4 Kitab Samawi & Penerimanya (Wajib hafal untuk UPKK):</strong><br>" +
+            "&nbsp;&nbsp;1. <strong>Kitab Taurat (توراة):</strong> Diwahyukan kepada <strong>Nabi Musa AS (نبي موسى)</strong> dalam Bahasa Ibrani (عبراني).<br>" +
+            "&nbsp;&nbsp;2. <strong>Kitab Zabur (زبور):</strong> Diwahyukan kepada <strong>Nabi Dawud AS (نبي داود)</strong> dalam Bahasa Qibti (قبطي).<br>" +
+            "&nbsp;&nbsp;3. <strong>Kitab Injil (انجيل):</strong> Diwahyukan kepada <strong>Nabi Isa AS (نبي عيسى)</strong> dalam Bahasa Suryani (سرياني).<br>" +
+            "&nbsp;&nbsp;4. <strong>Kitab Al-Quran (القرآن):</strong> Diwahyukan kepada <strong>Nabi Muhammad SAW (نبي محمد)</strong> dalam Bahasa Arab (عربي). Al-Quran merupakan kitab suci terakhir dan penyempurna seluruh ajaran kitab-kitab terdahulu.<br>" +
+            "• <em>Pengertian Suhuf (صُحُفْ)</em>: Lembaran wahyu yang mengandungi hukum ringkas, diturunkan kepada para nabi (seperti Nabi Ibrahim AS dan Nabi Musa AS) sebelum dibukukan menjadi kitab yang lengkap.<br>" +
+            "• <em>Kesan Beriman</em>: Menjadikan Al-Quran sebagai panduan mutlak harian, membaca al-Quran mendapat pahala besar, serta mencontohi akhlak mulia di dalamnya.",
+
+            "<strong>2. Beriman kepada Rasul (إِيـمَان كڤد رسول):</strong><br>" +
+            "• <em>Pengertian Nabi (نَبِي)</em>: Lelaki pilihan Allah yang menerima wahyu untuk dirinya sahaja dan tidak wajib menyampaikan kepada orang lain.<br>" +
+            "• <em>Pengertian Rasul (رَسُول)</em>: Lelaki pilihan Allah yang menerima wahyu untuk dirinya dan <strong>WAJIB</strong> menyampaikannya kepada seluruh umatnya.<br>" +
+            "• <strong>Sifat-sifat bagi Rasul (Wajib hafal):</strong><br>" +
+            "&nbsp;&nbsp;1. <strong>Sifat Wajib (4 Sifat):</strong><br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;- <em>Siddiq (صِدْقٌ):</em> Benar (بنر).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;- <em>Amanah (أَمَانَةٌ):</em> Dipercayai (دڤرچياءي).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;- <em>Tabligh (تَبْلِيغٌ):</em> Menyampaikan (پوچيتاكن/مپمڤايكن).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;- <em>Fatanah (فَطَانَةٌ):</em> Bijaksana (بيجقسان).<br>" +
+            "&nbsp;&nbsp;2. <strong>Sifat Mustahil (4 Sifat - Lawan Sifat Wajib):</strong><br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;- <em>Kizib (كِذْبٌ):</em> Dusta/Bohong (دوستا/بوهوڠ).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;- <em>Khianat (خِيَانَةٌ):</em> Pecah amanah (ڤچه امانه).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;- <em>Kitman (كِتْمَانٌ):</em> Menyembunyikan wahyu (پمبوپيكن وحي).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;- <em>Baladah (بَلَادَةٌ):</em> Bodoh (بودوه).<br>" +
+            "&nbsp;&nbsp;3. <strong>Sifat Jaiz (1 Sifat):</strong><br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;- <em>Al-Aradhul Basyariyyah (الْأَعْرَاضُ الْبَشَرِيَّةُ):</em> Sifat kemanusiaan biasa yang tidak menjejaskan martabat kerasulan yang mulia (seperti makan, minum, tidur, sakit ringan, berkahwin, dan sebagainya).",
+
+            "<strong>3. Rasul Ulul Azmi (أُولُو الْعَزْمِ) & Mukjizat:</strong><br>" +
+            "• <em>Pengertian Ulul Azmi</em>: Gelaran bagi 5 orang Rasul pilihan yang mempunyai tahap kesabaran, keteguhan hati, dan ketabahan yang luar biasa dalam menghadapi rintangan serta penentangan kaum mereka.<br>" +
+            "• <strong>Lima Rasul Ulul Azmi (Akronim: NIMIM):</strong><br>" +
+            "&nbsp;&nbsp;1. Nabi Nuh AS (نوح)<br>" +
+            "&nbsp;&nbsp;2. Nabi Ibrahim AS (ابراهيم)<br>" +
+            "&nbsp;&nbsp;3. Nabi Musa AS (موسى)<br>" +
+            "&nbsp;&nbsp;4. Nabi Isa AS (عيسى)<br>" +
+            "&nbsp;&nbsp;5. Nabi Muhammad SAW (محمد)<br>" +
+            "• <em>Pengertian Mukjizat (مُعْجِزَة)</em>: Perkara luar biasa yang dikurniakan oleh Allah SWT kepada para Rasul-Nya untuk membuktikan kebenaran risalah dan kenabian mereka serta melemahkan tentangan musuh. Contohnya: Al-Quran merupakan mukjizat agung bagi Nabi Muhammad SAW yang kekal hingga hari kiamat."
+          ],
+          tip: "Hafaz padanan Sifat Wajib dan Mustahil para Rasul serta ingat senarai penerima 4 Kitab Samawi dan 5 Rasul Ulul Azmi menggunakan akronim NIMIM."
+        },
+        5: {
+          title: "Beriman kepada Hari Akhirat (إِيـمَان كڤد هاري اخيرة) & Qada' (قَضَاء) dan Qadar (قَدَر)",
+          summary: "Ulang kaji komprehensif Akidah Tahun 5 (UPKK): Peringkat kiamat, tanda-tanda akhir zaman, serta ketetapan Azali Allah SWT.",
+          points: [
+            "<strong>1. Beriman kepada Hari Akhirat (إِيـمَان كڤد هاري اخيرة):</strong><br>" +
+            "• <em>Pengertian Hari Akhirat</em>: Hari berlakunya kemusnahan seluruh alam semesta secara total dan bermulanya fasa kehidupan yang baharu yang kekal abadi bagi menerima pembalasan atas segala perbuatan manusia di dunia.<br>" +
+            "• <strong>Nama-nama lain Hari Akhirat dalam Soalan UPKK:</strong><br>" +
+            "&nbsp;&nbsp;- <em>Yaumul Qiyamah (يَوْمُ الْقِيَامَةِ):</em> Hari Kiamat.<br>" +
+            "&nbsp;&nbsp;- <em>Yaumuddin (يَوْمُ الدِّينِ):</em> Hari Pembalasan amalan.<br>" +
+            "&nbsp;&nbsp;- <em>Yaumul Hisab (يَوْمُ الْحِسَابِ):</em> Hari Perhitungan amalan.<br>" +
+            "&nbsp;&nbsp;- <em>Yaumul Ba'ath (يَوْمُ الْبَعْثِ):</em> Hari Kebangkitan semula daripada kubur.<br>" +
+            "• <strong>Tanda-tanda Hari Kiamat:</strong><br>" +
+            "&nbsp;&nbsp;1. <strong>Tanda-tanda Kecil (علامة كچيل):</strong> Kurangnya ilmu agama/hilangnya para ulama, maksiat dilakukan secara berterusan dan terang-terangan, jumlah wanita melebihi lelaki, serta masa terasa berlalu dengan sangat pantas.<br>" +
+            "&nbsp;&nbsp;2. <strong>Tanda-tanda Besar (علامة بسر):</strong> Terbitnya matahari dari arah barat, munculnya fitnah Dajjal (دجال), turunnya Nabi Isa AS membunuh Dajjal, keluarnya Yakjuj & Makjuj (يأجوج ومأجوج), serta keluarnya asap tebal (Dukhan).<br>" +
+            "• <strong>Kronologi Proses di Hari Akhirat:</strong><br>" +
+            "&nbsp;&nbsp;Alam Barzakh (برزخ - Kubur) ➜ Tiupan Sangkakala (سڠكاكالا) ➜ Kebangkitan & Berhimpun di Padang Mahsyar (محشر) ➜ Hisab & Mizan (Perhitungan & Timbangan Amal) ➜ Menyeberangi Titian Sirat (صِرَاط) ➜ Balasan Syurga (جَنَّة - tempat nikmat) atau Neraka (نَار - tempat azab).",
+
+            "<strong>2. Beriman kepada Qada' (قَضَاء) dan Qadar (قَدَر):</strong><br>" +
+            "• <em>Pengertian Qada'</em>: Ketetapan dan ketentuan Allah SWT yang telah ditetapkan sejak azali lagi (sebelum penciptaan makhluk) terhadap segala sesuatu yang akan berlaku. Contoh: Menentukan jantina atau tarikh kelahiran seseorang.<br>" +
+            "• <em>Pengertian Qadar</em>: Pelaksanaan atau pembuktian nyata ke atas ketetapan Allah SWT yang berlaku mengikut kadar dan waktu yang ditentukan-Nya. Contoh: Seseorang itu betul-betul dilahirkan sebagai lelaki pada hari ini.<br>" +
+            "• <strong>Pembahagian Qada' (Dua Kategori):</strong><br>" +
+            "&nbsp;&nbsp;1. <strong>Qada' Mubram (قَضَاء مُبْرَم):</strong> Ketentuan mutlak Allah SWT yang pasti berlaku dan tidak boleh diubah atau dihalang oleh usaha makhluk sama sekali. Contoh: Tarikh kematian, bangsa, dan ajal seseorang.<br>" +
+            "&nbsp;&nbsp;2. <strong>Qada' Muallaq (قَضَاء مُعَلَّق):</strong> Ketentuan Allah SWT yang digantungkan dan boleh berubah mengikut usaha (ikhtiar), doa yang bersungguh-sungguh, serta tawakal makhluk. Contoh: Seseorang yang kurang pandai menjadi cemerlang kerana rajin mengulang kaji dan berdoa.<br>" +
+            "• <em>Hikmah Beriman kepada Qada' & Qadar</em>: Melahirkan jiwa yang reda, sabar dan tenang ketika diuji dengan musibah, menjauhi sifat sombong serta takbur apabila mengecap kejayaan, dan sentiasa positif berusaha."
+          ],
+          tip: "Fahami perbezaan ketara antara Qada' Mubram (mutlak) dan Qada' Muallaq (boleh diubah dengan doa & ikhtiar) serta kuasai nama-nama lain Hari Akhirat."
+        }
+      },
+      "Ibadah": {
+        1: {
+          title: "Bersuci (برسوچي) & Istinja' (استنجاء) & Wuduk (وضوء)",
+          summary: "Panduan lengkap Thaharah (طَهَارَة) untuk Tahun 1 mengikut silibus rasmi JAKIM.",
+          points: [
+            "<strong>1. Pengertian Bersuci:</strong> Membersihkan badan, pakaian, dan tempat daripada najis dan hadas mengikut cara yang ditetapkan oleh syarak.",
+            "<strong>2. Alat-alat Bersuci:</strong> Air mutlak (اءير مطلق), tanah bersih (تانه برسیه) untuk tayamum/samak, dan benda-benda kesat (بندا٢ كست) seperti batu (باتو), tisu, atau daun kering.",
+            "<strong>3. Jenis-jenis Air:</strong><br>• <em>Air Mutlak (اءير مطلق) [Suci & Menyucikan]</em>: Air hujan (اءير هوجن), air laut (اءير لاءوت), air sungai (اءير سوڠاي), air perigi (اءير ڤريڬي), air mata air (اءير مات ااءير), air salji (اءير سلجي), dan air embun (اءير امبون).<br>• <em>Air Mustakmal (اءير مستعمل) [Suci tetapi tidak boleh menyucikan]</em>: Air yang telah digunakan untuk mengangkat hadas fardu.<br>• <em>Air Musyammas (اءير مشمس) [Suci tetapi makruh digunakan]</em>: Air terdedah kepada matahari terik dalam bekas logam selain emas & perak.<br>• <em>Air Mutanajjis (اءير متنجس) [Tidak suci & tidak boleh menyucikan]</em>: Air yang dimasuki najis dan kurang daripada dua kolah (دوا كوله), atau berubah bau (باءو), warna, atau rasa (راسا).",
+            "<strong>4. Istinja' (استنجاء):</strong><br>• <em>Pengertian</em>: Membersihkan kubul (قُبُل - kemaluan hadapan) atau dubur (دُبُر - kemaluan belakang) selepas keluar air kencing atau air besar.<br>• <em>Hukum</em>: Wajib (واجب).<br>• <em>Alat Istinja'</em>: Air mutlak (utama). Jika tiada, guna benda kesat. Benda haram digunakan: tulang (تولڠ), makanan, najis kering, benda tajam, benda berharga, dan kertas yang mempunyai ayat Al-Quran.<br>• <em>Cara</em>: Guna air mutlak hingga hilang bau, warna, & rasa. Jika guna batu/tisu, wajib sekurang-kurangnya 3 biji batu/3 kali sapuan, najis belum kering, dan tidak beralih dari tempat asal.",
+            "<strong>5. Wuduk (وضوء):</strong><br>• <em>Pengertian</em>: Membasuh anggota badan tertentu berserta dengan niat untuk menghilangkan hadas kecil (حدث كچيل).<br>• <em>Niat</em>: <span class=\"font-semibold text-emerald-800\">\"نَوَيْتُ رَفْعَ الْحَدَثِ الْأَصْغَرِ لِلَّهِ تَعَالَى\"</span> (Sahaja aku mengangkat hadas kecil kerana Allah Taala).<br>• <em>Rukun Wuduk (روكون وضوء - 6 perkara fardu)</em>: 1. Niat (نية), 2. Membasuh muka (ممباسوه موك), 3. Membasuh kedua-dua tangan hingga ke siku (سيكو), 4. Menyapu sebahagian kepala (كڤала), 5. Membasuh kedua-dua kaki hingga ke buku lali (بوكو لالي), 6. Tertib (ترتيب).<br>• <em>Sunat Wuduk</em>: Membaca Basmalah (بِسْمِ اللَّهِ), basuh tapak tangan, berkumur, masuk air ke hidung, sapu semua kepala, basuh telinga, mulakan kanan, basuh 3 kali.<br>• <em>Membatalkan Wuduk</em>: Keluar sesuatu dari kubul/dubur, tidur tidak tetap punggung, hilang akal, bersentuhan kulit lelaki & perempuan bukan mahram tanpa lapik, menyentuh kubul/dubur dengan tapak tangan tanpa lapik."
+          ],
+          tip: "Pastikan semua anggota rukun wuduk dibasuh dengan sempurna dan merata tanpa tertinggal walau sehelai rambut."
+        },
+        2: {
+          title: "Azan (اذان), Iqamah (اقامة) & Solat Fardu (صلوة فرض)",
+          summary: "Asas seruan azan, iqamah, serta kefahaman solat fardu mengikut silibus Tahun 2 JAKIM.",
+          points: [
+            "<strong>1. Pengertian Azan & Iqamah:</strong><br>• <em>Azan (اذان)</em>: Lafaz khusus yang disyariatkan untuk menandakan masuknya waktu solat fardu.<br>• <em>Iqamah (اقامة)</em>: Lafaz khusus untuk menyeru jemaah berdiri menunaikan solat.<br>• <em>Hukum</em>: Sunat Muakkad (سنة مؤكد) bagi solat berjemaah.",
+            "<strong>2. Kalimah Tambahan Azan Subuh:</strong> Ditambah lafaz <span class=\"font-semibold text-emerald-800\">\"الصَّلَاةُ خَيْرٌ مِنَ النَّوْمِ\"</span> (Assalatu khairum minan naum). Jawabnya ialah <span class=\"font-semibold text-emerald-800\">\"صَدَقْتَ وَبَرَرْتَ\"</span> (Sadaqta wabararta).",
+            "<strong>3. Lafaz tatkala mendengar Azan:</strong> Ikut lafaz muazzin kecuali pada lafaz <em>'Hayya alas salah'</em> dan <em>'Hayya alal falah'</em>, jawabnya: <span class=\"font-semibold text-emerald-800\">\"لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ\"</span> (La hawla wala quwwata illa billahil aliyyil azim).",
+            "<strong>4. Solat Fardu (صلوة فرض):</strong> Wajib ditunaikan 5 kali sehari semalam: Subuh (صبح - 2 rakaat), Zohor (ظهر - 4 rakaat), Asar (عصر - 4 rakaat), Maghrib (مغرب - 3 rakaat), Isyak (عشاء - 4 rakaat). Jumlah keseluruhan: 17 rakaat.",
+            "<strong>5. Syarat Wajib & Syarat Sah Solat:</strong><br>• <em>Syarat Wajib</em>: 1. Islam, 2. Baligh, 3. Berakal, 4. Suci daripada haid (حيض) dan nifas (نفاس) bagi wanita, 5. Sampai seruan Islam.<br>• <em>Syarat Sah</em>: 1. Yakin masuk waktu solat, 2. Suci daripada hadas kecil/besar, 3. Suci badan, pakaian, & tempat daripada najis, 4. Menutup aurat (عورة), 5. Menghadap Kiblat (قبلة - Kaabah)."
+          ],
+          tip: "Hafal doa selepas azan kerana ia mengandungi syafaat Rasulullah SAW di hari akhirat kelak."
+        },
+        3: {
+          title: "Rukun Solat (روكون صلوة), Perkara Sunat & Solat Berjemaah (صلوة برجماعه)",
+          summary: "Panduan lengkap Fardu Ain Tahun 3 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM yang merangkumi rukun, sunat ab'ad, sunat hai'ah, perkara membatalkan solat, serta tatacara berjemaah.",
+          points: [
+            "<strong>1. Pengertian & Pembahagian Rukun Solat (روكون صلوة - 13 Perkara):</strong><br>Perkara yang wajib dilakukan dalam solat. Jika tertinggal salah satu daripadanya, solat menjadi tidak sah (بطل). Terbahagi kepada tiga kategori:<br>" +
+            "• <strong>Rukun Qalbi (ركن قلبي - Hati: 2 perkara):</strong><br>" +
+            "&nbsp;&nbsp;1. <em>Niat (نية):</em> Sengaja melakukan solat di dalam hati semasa Takbiratul Ihram.<br>" +
+            "&nbsp;&nbsp;2. <em>Tertib (ترتيب):</em> Melakukan rukun mengikut urutan yang betul.<br>" +
+            "• <strong>Rukun Qauli (ركن قولي - Lidah/Bacaan: 5 perkara - Wajib didengari telinga sendiri):</strong><br>" +
+            "&nbsp;&nbsp;1. <em>Takbiratul Ihram (تَكْبِيرَةُ الإِحْرَامِ):</em> Mengucapkan lafaz <span class=\"font-semibold text-emerald-800\">\"اللَّهُ أَكْبَر\"</span>.<br>" +
+            "&nbsp;&nbsp;2. <em>Membaca Surah Al-Fatihah (الفَاتِحَة):</em> Wajib dibaca pada setiap rakaat.<br>" +
+            "&nbsp;&nbsp;3. <em>Membaca Tahiyyat Akhir (تَحِيَّات اَخِير):</em> Dibaca semasa duduk yang terakhir.<br>" +
+            "&nbsp;&nbsp;4. <em>Selawat ke atas Nabi:</em> Membaca selawat dalam Tahiyyat Akhir.<br>" +
+            "&nbsp;&nbsp;5. <em>Memberi Salam (سلام):</em> Mengucapkan salam yang pertama sambil memalingkan muka ke kanan.<br>" +
+            "• <strong>Rukun Fi'li (ركن فعلي - Perbuatan: 6 perkara):</strong><br>" +
+            "&nbsp;&nbsp;1. <em>Berdiri betul:</em> Bagi yang mampu.<br>" +
+            "&nbsp;&nbsp;2. <em>Rukuk (ركوع) serta tamakninah.</em><br>" +
+            "&nbsp;&nbsp;3. <em>Iktidal (اعتدال) serta tamakninah.</em><br>" +
+            "&nbsp;&nbsp;4. <em>Sujud (سجود) dua kali serta tamakninah.</em><br>" +
+            "&nbsp;&nbsp;5. <em>Duduk antara dua sujud serta tamakninah.</em><br>" +
+            "&nbsp;&nbsp;6. <em>Duduk membaca Tahiyyat Akhir.</em><br><br>" +
+            "<strong>Pengertian Tamakninah (طُمَأْنِيْنَة):</strong> Berhenti seketika dengan tenang sekadar sebutan <span class=\"font-semibold text-emerald-800\">\"Subhanallah\" (سُبْحَانَ اللَّهِ)</span> semasa melakukan rukun-rukun fi'li di atas.",
+
+            "<strong>2. Perkara Sunat dalam Solat (سنة في الصلوة):</strong><br>" +
+            "• <strong>Sunat Ab'ad (سنة أبعاض):</strong> Perkara sunat yang kuat tuntutannya. Jika tertinggal, sunat diganti dengan melakukan <strong>Sujud Sahwi (سجود سهوي)</strong> sebelum memberi salam. Ada 6 perkara:<br>" +
+            "&nbsp;&nbsp;1. Membaca Doa Qunut (قُنُوت) pada iktidal rakaat kedua solat Subuh.<br>" +
+            "&nbsp;&nbsp;2. Berdiri semasa membaca Doa Qunut.<br>" +
+            "&nbsp;&nbsp;3. Membaca Tahiyyat Awal (تَحِيَّات اَوَّل).<br>" +
+            "&nbsp;&nbsp;4. Duduk membaca Tahiyyat Awal.<br>" +
+            "&nbsp;&nbsp;5. Berselawat ke atas Nabi Muhammad SAW dalam Tahiyyat Awal.<br>" +
+            "&nbsp;&nbsp;6. Berselawat ke atas keluarga Nabi Muhammad SAW dalam Tahiyyat Akhir.<br>" +
+            "• <strong>Sunat Hai'ah (سنة هيئات):</strong> Perkara sunat ringan. Jika tertinggal, <em>tidak perlu</em> sujud sahwi. Contohnya:<br>" +
+            "&nbsp;&nbsp;1. Mengangkat tangan ketika Takbiratul Ihram, rukuk, iktidal, dan ketika bangun daripada tahiyyat awal.<br>" +
+            "&nbsp;&nbsp;2. Meletakkan tangan kanan di atas tangan kiri semasa berdiri.<br>" +
+            "&nbsp;&nbsp;3. Membaca Doa Iftitah (اِفْتِتَاحْ) sebelum membaca Al-Fatihah.<br>" +
+            "&nbsp;&nbsp;4. Menyebut <span class=\"font-semibold text-emerald-800\">\"Amin\" (آمِيْن)</span> selepas Al-Fatihah.<br>" +
+            "&nbsp;&nbsp;5. Memandang ke arah tempat sujud.<br>" +
+            "&nbsp;&nbsp;6. Membaca tasbih semasa rukuk dan sujud.",
+
+            "<strong>3. Perkara yang Membatalkan Solat:</strong><br>" +
+            "Solat akan terbatal serta-merta sekiranya berlaku perkara berikut:<br>" +
+            "• Bercakap dengan sengaja walaupun satu huruf yang memberi faham.<br>" +
+            "• Melakukan pergerakan anggota besar (seperti tangan, kaki) sebanyak 3 kali berturut-turut.<br>" +
+            "• Kedatangan hadas kecil atau hadas besar (seperti keluar angin, air kencing, dll).<br>" +
+            "• Terkena najis (نجيس) yang tidak dimaafkan pada pakaian, badan, atau tempat solat.<br>" +
+            "• Terbuka aurat dengan sengaja (atau lambat menutupnya apabila ditiup angin).<br>" +
+            "• Makan atau minum dengan sengaja (walau sedikit).<br>" +
+            "• Berpaling dada daripada arah Kiblat (قبلة).<br>" +
+            "• Ketawa sehingga mengeluarkan suara/bunyi.<br>" +
+            "• Berubah niat solat (seperti berniat mahu membatalkan solat).<br>" +
+            "• Murtad (مرتد - keluar daripada agama Islam).",
+
+            "<strong>4. Solat Berjemaah (صلوة برجماعه):</strong><br>" +
+            "• <strong>Pengertian:</strong> Solat yang dilakukan oleh dua orang atau lebih, di mana seorang menjadi <strong>Imam (إِمَام)</strong> di hadapan dan yang lain menjadi <strong>Makmum (مَأْمُوم)</strong> mengikutinya di belakang.<br>" +
+            "• <strong>Hukum:</strong> Sunat Muakkad (سنة مؤكد) - sangat dituntut.<br>" +
+            "• <strong>Syarat Menjadi Imam & Makmum:</strong><br>" +
+            "&nbsp;&nbsp;1. Makmum mesti berniat mengikut Imam.<br>" +
+            "&nbsp;&nbsp;2. Makmum mesti mengetahui pergerakan Imam (melihat sendiri atau mendengar suara takbir).<br>" +
+            "&nbsp;&nbsp;3. Kedudukan makmum tidak boleh berada di hadapan Imam.<br>" +
+            "&nbsp;&nbsp;4. Saf (صف) solat berjemaah hendaklah dirapatkan dan diluruskan.<br>" +
+            "• <strong>Hikmah Solat Berjemaah:</strong><br>" +
+            "&nbsp;&nbsp;1. Mendapat ganjaran pahala sebanyak 27 kali ganda berbanding solat sendirian.<br>" +
+            "&nbsp;&nbsp;2. Mengukuhkan perpaduan dan kasih sayang sesama umat Islam.<br>" +
+            "&nbsp;&nbsp;3. Mendidik sifat berdisiplin dan patuh kepada pemimpin (Imam).",
+
+            "<strong>5. Jenis-jenis Makmum (جنيس٢ مأموم):</strong><br>" +
+            "• <strong>Makmum Muafik (مأموم موافق):</strong> Makmum yang sempat membaca Surah Al-Fatihah bersama-sama Imam dengan bacaan yang sederhana pada rakaat pertama (sempat berdiri lama bersama Imam).<br>" +
+            "• <strong>Makmum Masbuk (مأموم مسبوق):</strong> Makmum yang tidak sempat membaca Surah Al-Fatihah bersama-sama Imam pada rakaat pertama (lambat menyertai solat, atau Imam sudah rukuk). Makmum ini perlu menambah rakaat yang tertinggal selepas Imam memberi salam."
+          ],
+          tip: "Hafal perbezaan antara Rukun Qauli (bacaan) dan Rukun Fi'li (perbuatan), serta pastikan anda sentiasa mengekalkan tamakninah untuk menjaga kesahihan solat."
+        },
+        4: {
+          title: "Solat Jumaat (صلوة جمعة), Solat Dua Hari Raya (صلوة دوا هاري راي) & Solat Jenazah (صلوة جنازة)",
+          summary: "Panduan lengkap Fardu Ain dan Fardu Kifayah bagi subjek Ibadah Tahun 4 mengikut sukatan pelajaran rasmi JAKIM.",
+          points: [
+            "<strong>1. Solat Jumaat (صلوة جمعة):</strong><br>• <em>Pengertian</em>: Solat fardu dua rakaat yang dilakukan pada waktu Zohor hari Jumaat secara berjemaah, didahului dengan dua khutbah.<br>• <em>Hukum</em>: Fardu Ain (فرض عين) bagi setiap lelaki Muslim yang memenuhi syarat wajib.<br>• <em>Syarat Wajib Solat Jumaat</em>: 1. Islam, 2. Baligh, 3. Berakal, 4. Lelaki, 5. Sihat badan, 6. Merdeka, 7. Mastautin (مستوطن - penduduk tetap) atau Mukim (مقيم).<br>• <em>Syarat Sah Solat Jumaat</em>: Didirikan di masjid/tempat khas, bilangan jemaah sekurang-kurangnya 40 orang yang memenuhi syarat wajib (lelaki, baligh, mastautin), dilakukan dalam waktu Zohor, didahului dengan DUA KHUTBAH (خطبة).",
+            "<strong>2. Rukun Khutbah Jumaat (روكون خطبة - 5 perkara wajib):</strong><br>1. Memuji Allah (الحمد لله),<br>2. Berselawat ke atas Nabi SAW (الصلاة على Nabi),<br>3. Berwasiat dengan takwa (الوصية بالتقوى),<br>4. Membaca sekurang-kurangnya satu ayat al-Quran pada salah satu khutbah,<br>5. Mendoakan kesejahteraan umat Islam pada khutbah kedua.",
+            "<strong>3. Amalan Sunat Hari Jumaat:</strong> Mandi sunat Jumaat, memotong kuku, memakai pakaian putih yang bersih, memakai wangi-wangian, datang awal ke masjid, membaca surah Al-Kahfi (الكهف), mendengar khutbah dengan diam (tidak bercakap-cakap).",
+            "<strong>4. Solat Dua Hari Raya (صلوة دوا هاري راي):</strong><br>• <em>Pengertian</em>: Solat sunat dua rakaat yang didirikan pada pagi hari raya 1 Syawal [Aidilfitri (عيد الفطر)] dan 10 Zulhijjah [Aidiladha (عيد الأضحى)].<br>• <em>Hukum</em>: Sunat Muakkad (سنة مؤكد).<br>• <em>Kaifiat (Cara) Solat</em>:<br>&nbsp;&nbsp;- <em>Rakaat pertama</em>: Takbiratul Ihram, doa Iftitah, bertakbir sebanyak <strong>7 kali</strong> (di selang-seli dengan tasbih <span class=\"font-semibold text-emerald-800\">\"سُبْحَانَ اللَّهِ وَالْحَمْدُ لِلَّهِ وَلَا إِلَهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ\"</span>), membaca Al-Fatihah dan surah.<br>&nbsp;&nbsp;- <em>Rakaat kedua</em>: Bangun dari sujud, bertakbir sebanyak <strong>5 kali</strong> (di selang-seli dengan tasbih yang sama), membaca Al-Fatihah dan surah, meneruskan solat sehingga salam. Diikuti dengan penyampaian dua khutbah hari raya.",
+            "<strong>5. Solat Jenazah (صلوة جنازة):</strong><br>• <em>Hukum menguruskan jenazah</em>: Fardu Kifayah (فرض كفاية).<br>• <em>Rukun Solat Jenazah (TIADA RUKUK & SUJUD, dilakukan berdiri terus)</em>:<br>&nbsp;&nbsp;1. Niat solat jenazah,<br>&nbsp;&nbsp;2. Berdiri betul bagi yang mampu,<br>&nbsp;&nbsp;3. Bertakbir sebanyak 4 kali,<br>&nbsp;&nbsp;4. Membaca surah Al-Fatihah selepas takbir pertama,<br>&nbsp;&nbsp;5. Berselawat ke atas Nabi SAW selepas takbir kedua,<br>&nbsp;&nbsp;6. Mendoakan mayat selepas takbir ketiga,<br>&nbsp;&nbsp;7. Berdoa atau diam sebentar selepas takbir keempat,<br>&nbsp;&nbsp;8. Memberi salam pertama ke kanan dan kedua ke kiri.<br>• <em>Kedudukan Imam semasa Solat</em>:<br>&nbsp;&nbsp;- Bagi jenazah <strong>LELAKI</strong>, imam berdiri di paras <strong>KEPALA (رأس)</strong> mayat.<br>&nbsp;&nbsp;- Bagi jenazah <strong>PEREMPUAN / KHUNSA</strong>, imam berdiri di paras <strong>PINGGANG (وسط)</strong> mayat.<br>&nbsp;&nbsp;- Kepala mayat sentiasa diletakkan di sebelah kiri imam."
+          ],
+          tip: "Bagi UPKK, hafal susunan 4 takbir Solat Jenazah kerana soalan ini kerap ditanya dalam bahagian kefahaman ibadah."
+        },
+        5: {
+          title: "Puasa Ramadan (ڤواسا رمضان / صِيَام), Solat Tarawih (صلوة تراويح) & Witir (صلوة وتر)",
+          summary: "Ulang kaji lengkap kewajipan puasa, solat-solat sunat muakkad malam Ramadan, serta pengisian amalan utama.",
+          points: [
+            "<strong>1. Puasa Ramadan / Siyam (صِيَام):</strong><br>• <em>Pengertian</em>: Menahan diri daripada perkara-perkara yang membatalkan puasa bermula dari terbit fajar sadiq (فجر صادق - waktu Subuh) hingga terbenam matahari (waktu Maghrib) disertai dengan niat.<br>• <em>Hukum</em>: Fardu Ain (فرض عين) bagi setiap umat Islam.<br>• <em>Rukun Puasa</em>: 1. Niat puasa (di dalam hati pada waktu malam sebelum fajar/Subuh), 2. Menahan diri daripada perkara yang membatalkan puasa.",
+            "<strong>2. Syarat Wajib & Sah Puasa:</strong><br>• <em>Syarat Wajib</em>: Islam, Baligh, Berakal, Mampu (sihat dan tidak uzur).<br>• <em>Syarat Sah</em>: Islam, Mumayyiz (مميز), Suci daripada haid, nifas, dan wiladah bagi wanita, serta berpuasa pada hari yang tidak diharamkan (bukan hari raya atau hari tasyrik).",
+            "<strong>3. Perkara Membatalkan Puasa:</strong><br>Makan atau minum dengan sengaja, memasukkan sesuatu ke dalam rongga terbuka dengan sengaja, muntah dengan sengaja, keluar darah haid atau nifas, gila, murtad, bersetubuh (jima') pada siang hari Ramadan.",
+            "<strong>4. Golongan Diharuskan Berbuka (Wajib ganti/Qada' puasa):</strong><br>Orang sakit yang memudaratkan jika berpuasa, musafir yang berjalan jauh (melebihi 2 marhalah atau kira-kira 85km), orang tua yang sangat uzur (wajib bayar fidyah), perempuan hamil atau menyusukan anak yang bimbang akan keselamatan diri atau anaknya.",
+            "<strong>5. Solat Tarawih (صلوة تراويح) & Witir (صلوة وتر) serta Menghayati Ramadan:</strong><br>• <em>Solat Tarawih</em>: Solat sunat yang dilakukan HANYA pada malam bulan Ramadan selepas solat Isyak hingga sebelum fajar. Boleh dilakukan sebanyak 8 atau 20 rakaat (setiap 2 rakaat satu salam). Hukum: Sunat Muakkad.<br>• <em>Solat Witir</em>: Solat sunat dengan bilangan rakaat ganjil (minimum 1 rakaat, maksima 11 rakaat, kebiasaannya 3 rakaat) sebagai penutup solat malam. Hukum: Sunat Muakkad.<br>• <em>Amalan Utama Ramadan</em>: Menghidupkan malam Lailatul Qadar (ليلة القدر - malam yang lebih baik daripada 1,000 bulan), memperbanyakkan Iktikaf (اعتكاف) di masjid pada 10 malam terakhir, melipatgandakan sedekah, membaca al-Quran (tadarus), serta membayar Zakat Fitrah (زكاة فطرة)."
+          ],
+          tip: "Niat puasa boleh dibaca setiap malam, atau niat sebulan penuh pada malam pertama Ramadan untuk mengelakkan terlupa."
+        }
+      },
+      "Sirah": {
+        1: {
+          title: "Kelahiran & Silsilah Keturunan Nabi Muhammad SAW (سلسله كتورونن دان ولاده نبي محمد)",
+          summary: "Ulang kaji lengkap silsilah keturunan, peristiwa kelahiran yang agung, serta tempoh penyusuan Baginda berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM.",
+          points: [
+            "<strong>1. Silsilah Keturunan Nabi Muhammad SAW (سلسله كتورونن نبي محمد):</strong><br>" +
+            "• <strong>Nama Penuh Baginda:</strong> Muhammad bin Abdullah bin Abdul Mutalib bin Hashim.<br>" +
+            "• <strong>Ibu Baginda:</strong> Aminah binti Wahab (امينه بنت وهب) - Seorang wanita mulia daripada keturunan Bani Zuhrah.<br>" +
+            "• <strong>Bapa Baginda:</strong> Abdullah bin Abdul Mutalib (عبد الله بن عبد المطلب) - Meninggal dunia di Madinah (Yathrib) semasa Baginda berusia 2 bulan di dalam kandungan ibunya.<br>" +
+            "• <strong>Datuk Baginda:</strong> Abdul Mutalib bin Hashim (عبد المطلب بن هاشم) - Pemimpin utama kaum Quraisy yang sangat dihormati.",
+            "<strong>2. Ibu-ibu Penyusu Baginda (ايبو٢ ڤپوسو نبي محمد):</strong><br>" +
+            "• <strong>1. Thuwaibah Al-Aslamiyyah (ثُوَيْبَةُ الأَسْلَمِيَّةُ):</strong> Ibu penyusu pertama yang menyusukan Baginda selama beberapa hari sahaja selepas dilahirkan.<br>" +
+            "• <strong>2. Halimah As-Sa'diyyah (حَلِيمَةُ السَّعْدِيَّةُ):</strong> Ibu penyusu utama yang membawa Baginda pulang ke perkampungan Bani Sa'ad di kawasan pedalaman yang udaranya bersih selama 4 tahun. Kehadiran Baginda membawa limpahan berkat dan rezeki kepada keluarga Halimah.",
+            "<strong>3. Kelahiran Nabi Muhammad SAW (ولاده نبي محمد):</strong><br>" +
+            "• <strong>Tarikh Lahir:</strong> Hari <strong>Isnin</strong>, <strong>12 Rabiulawal (12 ربيع الأول)</strong>.<br>" +
+            "• <strong>Tahun Kelahiran:</strong> Dikenali sebagai <strong>Tahun Gajah (تاهون ڬاجه)</strong>.<br>" +
+            "• <strong>Tempat Lahir:</strong> Kota suci <strong>Mekah Al-Mukarramah (مكة المكرمة)</strong>.<br>" +
+            "• <strong>Status Kelahiran:</strong> Baginda dilahirkan sebagai seorang anak <strong>Yatim (يتيم)</strong>.",
+            "<strong>4. Peristiwa Tentera Bergajah (تنترا برڬاجه):</strong><br>" +
+            "• Mengapa dinamakan Tahun Gajah? Kerana pada tahun tersebut, Kota Mekah diserang oleh angkatan tentera bergajah yang besar di bawah pimpinan Raja Abrahah dari Yaman bertujuan untuk meruntuhkan Kaabah.<br>" +
+            "• Keagungan Allah SWT menyelamatkan Kaabah dengan menghantar kawanan <strong>burung Ababil (أَبَابِيل)</strong> yang melemparkan batu-batu berapi (Sijjil) dari neraka, memusnahkan seluruh tentera Abrahah seperti daun-daun yang dimakan ulat."
+          ],
+          tip: "Hafaz nama penuh bapa, ibu, datuk serta kedua-dua ibu penyusu Baginda mengikut turutan peristiwa sejarah yang betul."
+        },
+        2: {
+          title: "Zaman Kanak-kanak & Sifat Mulia Remaja Rasulullah SAW (زمان كانق٢ دان صفت موليا نبي محمد)",
+          summary: "Kefahaman terperinci mengenai fasa kehidupan yatim piatu Baginda serta gelaran kemuliaan Al-Amin semasa zaman remaja mengikut silibus Tahun 2 JAKIM.",
+          points: [
+            "<strong>1. Zaman Kanak-kanak yang Penuh Pengorbanan (زمان كانق٢):</strong><br>" +
+            "• <strong>Kematian Ibu (Usia 6 Tahun):</strong> Semasa Baginda berumur 6 tahun, ibunya Aminah membawa Baginda menziarahi kubur bapanya di Madinah. Dalam perjalanan pulang, ibunya jatuh sakit dan meninggal dunia di sebuah tempat bernama <strong>Abwa' (الأَبْوَاءُ)</strong>. Baginda menjadi anak <strong>Yatim Piatu (يتيم ڤياتو)</strong>.<br>" +
+            "• <strong>Jagaan Datuk (Usia 6 - 8 Tahun):</strong> Selepas kematian ibunya, Baginda dipelihara dengan penuh kasih sayang oleh datuknya, Abdul Mutalib, selama 2 tahun.<br>" +
+            "• <strong>Kematian Datuk (Usia 8 Tahun):</strong> Semasa Baginda berumur 8 tahun, datuknya pula meninggal dunia. Sebelum wafat, beliau mengamanahkan jagaan Baginda kepada Abu Talib.",
+            "<strong>2. Di Bawah Jagaan Bapa Saudara (أبو طالب):</strong><br>" +
+            "• Tanggungjawab mengasuh Baginda berpindah kepada bapa saudaranya, <strong>Abu Talib (أبو طالب)</strong>.<br>" +
+            "• Walaupun Abu Talib seorang yang kurang berkemampuan (miskin) dan mempunyai anak yang ramai, beliau menyayangi dan menjaga Baginda melebihi anak kandungnya sendiri. Kehidupan keluarga Abu Talib dipenuhi keberkatan sejak kehadiran Baginda.",
+            "<strong>3. Pekerjaan Zaman Muda & Remaja:</strong><br>" +
+            "• <strong>Menggembala Kambing (مڠڬمبالا كمبيڠ):</strong> Semasa kanak-kanak dan awal remaja, Baginda membantu menggembala kambing milik penduduk Mekah untuk meringankan beban kewangan bapa saudaranya. Pekerjaan ini mendidik sifat sabar, pimpinan, dan kasih sayang.<br>" +
+            "• <strong>Berniaga ke Syam (شام):</strong> Baginda mula mengikut Abu Talib keluar berniaga ke negeri Syam seawal usia 12 tahun dan mempelajari seluk-beluk perniagaan secara jujur.",
+            "<strong>4. Gelaran Al-Amin (الأَمِينُ):</strong><br>" +
+            "• Baginda sangat terkenal dalam kalangan masyarakat Arab Quraisy dengan sifat kejujuran yang luar biasa dan amanah yang tinggi.<br>" +
+            "• Disebabkan Baginda tidak pernah berbohong, sentiasa menunaikan janji dan menjaga amanah harta dagangan dengan sempurna, penduduk Mekah menggelar Baginda sebagai <strong>Al-Amin (الأَمِينُ)</strong> yang bermaksud <strong>\"Yang Dipercayai\" (يڠ دڤرچاياءي)</strong>."
+          ],
+          tip: "Ingatlah kronologi umur penting: Usia 6 tahun (kematian ibu), usia 8 tahun (kematian datuk), serta maksud utama di sebalik gelaran agung Al-Amin."
+        },
+        3: {
+          title: "Perkahwinan dengan Khadijah, Kerasulan & Fasa Dakwah di Mekah",
+          summary: "Ulang kaji lengkap Sirah Tahun 3 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM: Kisah perkahwinan agung, penerimaan wahyu di Gua Hira', serta fasa dakwah secara rahsia dan terang-terangan.",
+          points: [
+            "<strong>1. Perkahwinan Nabi Muhammad SAW dengan Sayyidatina Khadijah (ڤركهوينن دڠن خديجة):</strong><br>" +
+            "• <em>Latar Belakang Sayyidatina Khadijah</em>: Sayyidatina Khadijah binti Khuwailid (خَدِيجَةُ بِنْتُ خُوَيْلِدٍ) merupakan seorang wanita bangsawan Arab Quraisy yang sangat dihormati, pemurah, dan usahawan perniagaan wanita yang kaya raya di Mekah.<br>" +
+            "• <em>Urusan Perniagaan ke Syam</em>: Sayyidatina Khadijah mengambil Nabi Muhammad SAW bekerja menguruskan barangan dagangannya ke negeri Syam (شام) setelah mendengar tentang kejujuran dan gelaran <strong>Al-Amin (الأَمِينُ)</strong> Baginda. Dalam perjalanan ini, Baginda dibantu oleh hamba lelaki Khadijah bernama <strong>Maisarah (مَيْسَرَة)</strong>.<br>" +
+            "• <em>Detik Perkahwinan Agung</em>: Maisarah menceritakan sifat amanah, kebaikan, serta perkara luar biasa (seperti awan menaungi Nabi) sepanjang perjalanan kepada Khadijah. Tertarik dengan kemuliaan akhlak Baginda, Sayyidatina Khadijah mengambil keputusan untuk melamar Baginda. Ketika berkahwin, <strong>umur Nabi Muhammad SAW ialah 25 tahun</strong>, manakala <strong>Sayyidatina Khadijah berumur 40 tahun</strong>.",
+
+            "<strong>2. Kerasulan Nabi Muhammad SAW (كرسولن نبي محمد):</strong><br>" +
+            "• <em>Peristiwa di Gua Hira' (غَار حِرَاء)</em>: Sebelum dilantik menjadi Rasul, Nabi Muhammad SAW suka menyisihkan diri daripada masyarakat (bertahannuth - تَعَبُّد) di Gua Hira' yang terletak di puncak Jabal Nur (جبل نور) untuk memikirkan kerosakan akidah dan akhlak masyarakat Arab Jahiliyyah.<br>" +
+            "• <em>Penerimaan Wahyu Pertama (17 Ramadan)</em>: Pada malam Isnin, <strong>17 Ramadan (17 رمضان)</strong>, ketika Nabi Muhammad SAW <strong>berumur 40 tahun</strong>, Malaikat <strong>Jibril (جِبْرِيل)</strong> datang menemui Baginda lalu menyampaikan wahyu yang pertama daripada Allah SWT.<br>" +
+            "• <em>Lafaz Wahyu Pertama</em>: Lima ayat pertama daripada <strong>Surah Al-'Alaq (سُورَة العَلَق)</strong> iaitu:<br>" +
+            "&nbsp;&nbsp;<span class=\"font-semibold text-emerald-800\">\"اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ\"</span> (Bacalah dengan nama Tuhanmu yang menciptakan). Peristiwa agung ini menandakan bermulanya kerasulan Nabi Muhammad SAW sebagai rahmat bagi sekalian alam.",
+
+            "<strong>3. Dakwah Nabi Muhammad SAW di Mekah (دعوة دي mة)</strong>:<br>" +
+            "• <strong>Fasa 1: Dakwah Secara Rahsia / Siri (دعوة چارا سيمڤن - 3 Tahun)</strong>:<br>" +
+            "&nbsp;&nbsp;- Dilakukan secara senyap-senyap selama 3 tahun dengan menumpukan kepada ahli keluarga terdekat dan sahabat karib.<br>" +
+            "&nbsp;&nbsp;- <em>Golongan Terawal Memeluk Islam (As-Sabiqun Al-Awwalun - السَّابِقُونَ الأَوَّلُونَ)</em>:<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;1. Sayyidatina Khadijah binti Khuwailid (wanita pertama).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;2. Saidina Abu Bakar Al-Siddiq (lelaki dewasa pertama).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;3. Saidina Ali bin Abi Talib (kanak-kanak pertama).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;4. Saidina Zaid bin Harithah (golongan hamba pertama).<br>" +
+            "&nbsp;&nbsp;- <em>Pusat Dakwah</em>: Rumah sahabat bernama <strong>Arqam bin Abi Arqam (دار الأرقم)</strong> menjadi markas rahsia pertemuan dan pembelajaran Islam.<br>" +
+            "• <strong>Fasa 2: Dakwah Secara Terang-terangan (دعوة چارا تربوك)</strong>:<br>" +
+            "&nbsp;&nbsp;- Bermula selepas turunnya perintah Allah melalui Surah Al-Hijr ayat 94. Baginda memulakan dengan mengumpulkan penduduk Mekah di kaki <strong>Bukit Safa (جبل صفا)</strong>.<br>" +
+            "&nbsp;&nbsp;- <em>Tentangan Kaum Musyrikin</em>: Dakwah ini mendapat tentangan yang sangat hebat, penghinaan, pemboikotan, serta penyeksaan fizikal daripada kafir Quraisy, terutamanya dipelopori oleh bapa saudara Baginda sendiri iaitu <strong>Abu Lahab (أبو لهب)</strong> dan pemimpin Quraisy <strong>Abu Jahal (أبو جهل)</strong>."
+          ],
+          tip: "Ingatlah umur perkahwinan Baginda (25 tahun) berbanding Khadijah (40 tahun), tarikh turunnya wahyu pertama pada 17 Ramadan semasa berusia 40 tahun, serta senarai 4 orang terawal memeluk Islam."
+        },
+        4: {
+          title: "Peristiwa Hijrah ke Madinah (هجرة ك مدینه) & Pembentukan Negara Islam",
+          summary: "Ulang kaji intensif Sirah Tahun 4 (UPKK): Kronologi perpindahan agung ke Madinah serta langkah awal pembinaan negara Islam bertulis pertama di dunia.",
+          points: [
+            "<strong>1. Pengertian Hijrah (هجرة):</strong><br>Perpindahan Nabi Muhammad SAW dan umat Islam dari Kota Mekah ke Kota Madinah (Yathrib) untuk mempertahankan iman, menyelamatkan diri daripada kezaliman, serta mengembangkan syiar Islam ke seluruh pelusuk dunia.",
+            "<strong>2. Faktor-faktor yang Mendorong Hijrah:</strong><br>" +
+            "• Penentangan kaum kafir Quraisy di Mekah yang semakin kejam dan tidak berperikemanusiaan.<br>" +
+            "• Pakatan jahat pembunuhan Nabi Muhammad SAW oleh pembesar Quraisy di <strong>Darul Nadwah (دار الندوة)</strong>.<br>" +
+            "• Adanya pelawaan, jaminan keselamatan, serta janji taat setia daripada penduduk Yathrib melalui Perjanjian Aqabah Pertama dan Kedua.",
+            "<strong>3. Kronologi Peristiwa Hijrah yang Agung:</strong><br>" +
+            "• <strong>Saidina Abu Bakar Al-Siddiq (أبو بكر الصديق):</strong> Dipilih menjadi teman setia Nabi sepanjang perjalanan hijrah.<br>" +
+            "• <strong>Saidina Ali bin Abi Talib (علي):</strong> Menunjukkan keberanian luar biasa menggantikan tempat tidur Nabi untuk mengelirukan pihak musuh yang mengepung rumah Baginda.<br>" +
+            "• <strong>Gua Thaur (غَار ثَوْر):</strong> Tempat persembunyian Nabi dan Saidina Abu Bakar selama 3 hari daripada buruan kafir Quraisy.<br>" +
+            "• <strong>Abdullah bin Uraiqit:</strong> Seorang penunjuk jalan yang mahir (bukan Islam tetapi amanah) diupah untuk memandu perjalanan melalui laluan alternatif ke Madinah.<br>" +
+            "• <strong>Masjid Quba' (مسجد قباء):</strong> Masjid pertama yang dibina oleh Nabi Muhammad SAW sebaik sahaja tiba di perkampungan Quba'.<br>" +
+            "• <strong>Muhajirin (مهاجرين) & Ansar (أنصار):</strong> Ketibaan Baginda disambut gembira oleh kaum Muhajirin (umat Islam Mekah yang berhijrah) dan kaum Ansar (penduduk asal Madinah yang membantu).",
+            "<strong>4. Langkah Pertama Pembentukan Negara Islam Madinah:</strong><br>" +
+            "• <strong>Membina Masjid Nabawi (مسجد النبوي):</strong> Menjadi pusat ibadah, syura, tempat pentadbiran negara, serta wadah penyatuan masyarakat.<br>" +
+            "• <strong>Mempersaudarakan Muhajirin & Ansar:</strong> Membina ikatan persaudaraan yang kukuh berasaskan akidah Islam bagi menggantikan semangat kabilah Jahiliyyah.<br>" +
+            "• <strong>Piagam Madinah (صحيفة المدينة):</strong> Menggubal perlembagaan bertulis pertama di dunia bagi mengatur hak dan tanggungjawab semua penduduk termasuk kaum Yahudi."
+          ],
+          tip: "Kuasai nama-nama penting seperti Gua Thaur, Masjid Quba', serta tiga langkah pertama pembinaan negara Madinah yang sering ditanya dalam peperiksaan UPKK."
+        },
+        5: {
+          title: "Peperangan Utama Islam (ڤڤراڠن اوتام) & Kewafatan Rasulullah SAW (وفاة رسول الله)",
+          summary: "Ulang kaji komprehensif Sirah Tahun 5 (UPKK): Etika pertahanan Islam, fakta 3 perang besar (Badar, Uhud, Khandaq), Haji Wada' serta detik kewafatan Baginda.",
+          points: [
+            "<strong>1. Syarat dan Etika Peperangan dalam Islam:</strong><br>" +
+            "• Peperangan hanya dibenarkan untuk mempertahankan diri, memelihara kesucian agama, dan menjaga kedaulatan tanah air (bukan untuk menjajah atau menzalimi).<br>" +
+            "• <strong>Larangan Keras dalam Perang (Etika Islam):</strong> Haram membunuh orang tua, wanita, kanak-kanak, serta dilarang merosakkan tempat ibadat, harta benda awam, dan tumbuh-tumbuhan.",
+            "<strong>2. Tiga Peperangan Besar yang Wajib Dihafal (Silibus UPKK):</strong><br>" +
+            "• <strong>A. Perang Badar (غَزْوَةُ بَدْرٍ):</strong><br>" +
+            "&nbsp;&nbsp;- <em>Tarikh</em>: 17 Ramadan, Tahun 2 Hijrah.<br>" +
+            "&nbsp;&nbsp;- <em>Bilangan Tentera</em>: Islam (313 orang) menentang kafir Quraisy (1,000 orang).<br>" +
+            "&nbsp;&nbsp;- <em>Keputusan</em>: Tentera Islam mendapat pertolongan malaikat dan mencapai <strong>Kemenangan</strong> yang gemilang. Tokoh syahid utama ialah Ubaidah bin Al-Harith.<br>" +
+            "• <strong>B. Perang Uhud (غَزْوَةُ أُحُدٍ):</strong><br>" +
+            "&nbsp;&nbsp;- <em>Tarikh</em>: Syawal, Tahun 3 Hijrah di kaki Bukit Uhud.<br>" +
+            "&nbsp;&nbsp;- <em>Bilangan Tentera</em>: Islam (700 orang - asalnya 1,000 orang tetapi 300 orang tentera munafik pimpinan Abdullah bin Ubay berpaling tadah) menentang kafir Quraisy (3,000 orang).<br>" +
+            "&nbsp;&nbsp;- <em>Punca Kegagalan</em>: Pasukan pemanah Islam (pasukan ruman) melanggar arahan Nabi supaya kekal di puncak bukit, sebaliknya turun mengejar harta rampasan perang (Ghanimah).<br>" +
+            "&nbsp;&nbsp;- <em>Keputusan</em>: Tentera Islam <strong>Tewas</strong>. Sayyidina Hamzah bin Abdul Mutalib (bapa saudara Nabi) gugur syahid dan digelar Penghulu para Syuhada.<br>" +
+            "• <strong>C. Perang Khandaq / Ahzab (غَزْوَةُ الْخَنْدَقِ):</strong><br>" +
+            "&nbsp;&nbsp;- <em>Tarikh</em>: Syawal, Tahun 5 Hijrah.<br>" +
+            "&nbsp;&nbsp;- <em>Krisis</em>: Gabungan tentera bersekutu kafir (Ahzab) seramai 10,000 orang mengepung kota Madinah.<br>" +
+            "&nbsp;&nbsp;- <em>Strategi</em>: Membina parit (خندق) besar di sekeliling Madinah atas cadangan sahabat pintar <strong>Salman Al-Farisi (سلمان الفارسي)</strong>.<br>" +
+            "&nbsp;&nbsp;- <em>Keputusan</em>: Tentera Islam <strong>Menang</strong> setelah Allah menghantar bantuan berupa angin taufan yang dahsyat yang menerbangkan khemah dan memecahbelahkan pakatan musuh.",
+            "<strong>3. Peristiwa Haji Perpisahan (حَجَّةُ الْوَدَاعِ):</strong><br>Ibadah haji terakhir yang ditunaikan oleh Nabi Muhammad SAW pada Tahun 10 Hijrah. Baginda menyampaikan khutbah terakhir yang menyentuh hati di Lembah Arafah, menekankan persaudaraan Islam, penghapusan amalan riba, serta memuliakan wanita.",
+            "<strong>4. Kewafatan Rasulullah SAW (وفاة رسول الله):</strong><br>" +
+            "• <strong>Tarikh Wafat:</strong> Hari <strong>Isnin</strong>, <strong>12 Rabiulawal Tahun 11 Hijrah (11 هجرية)</strong>.<br>" +
+            "• <strong>Sebab & Tempat:</strong> Baginda wafat di pangkuan isteri tercinta Sayyidatina Aisyah di rumah beliau kerana sakit demam panas pada usia <strong>63 tahun</strong>.<br>" +
+            "• <strong>Makam Baginda:</strong> Dimakamkan di tempat kewafatan Baginda, yang kini berada di dalam kawasan Masjid Nabawi di Madinah.<br>" +
+            "• <strong>Pusaka Teragung:</strong> Rasulullah SAW pergi dengan meninggalkan dua perkara utama sebagai panduan hidup sepanjang zaman agar tidak tersesat selamanya, iaitu <strong>Al-Quran (القرآن)</strong> dan <strong>Sunnah (السنة)</strong>."
+          ],
+          tip: "Ingatlah fakta penting seperti tarikh 17 Ramadan bagi Perang Badar, cadangan parit oleh Salman Al-Farisi, pusingan tentera munafik dalam Perang Uhud, serta umur wafat Baginda (63 tahun)."
+        }
+      },
+      "Adab": {
+        1: {
+          title: "Adab Mengurus Diri & Makan Minum",
+          summary: "Ulang kaji lengkap Adab Islam bagi Tahun 1 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM.",
+          points: [
+            "<strong>1. Adab Mengurus Diri - Adab Tidur (ادب تيدور):</strong><br>" +
+            "• <em>Sebelum Tidur</em>: Bersihkan diri (basuh kaki dan gosok gigi), mengambil wuduk (وضوء), mengibas tempat tidur untuk membersihkan habuk/kotoran, baring menghadap Kiblat di atas sisi kanan badan.<br>" +
+            "• <em>Doa Tidur</em>: Membaca lafaz <span class=\"font-semibold text-emerald-800\">\"بِاسْمِكَ اللَّهُمَّ أَحْيَا وَأَمُوتُ\"</span> (Dengan nama-Mu ya Allah aku hidup dan aku mati).<br>" +
+            "• <em>Bangun Tidur</em>: Membaca doa bangun tidur <span class=\"font-semibold text-emerald-800\">\"الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ\"</span> (Segala puji bagi Allah yang menghidupkan kami setelah mematikan kami, dan kepada-Nya kami kembali), mengemas tempat tidur dengan kemas, serta terus mandi untuk membersihkan badan.",
+            "<strong>2. Adab di Bilik Air (ادب دبيليق اءير):</strong><br>" +
+            "• <em>Peraturan Masuk & Keluar</em>: Memakai alas kaki (selipar), menutup kepala dengan tuala atau kain, masuk ke dalam bilik air dengan mendahului kaki kiri, dan keluar mendahului kaki kanan.<br>" +
+            "• <em>Doa Masuk</em>: <span class=\"font-semibold text-emerald-800\">\"اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ\"</span> (Ya Allah, aku berlindung dengan-Mu daripada syaitan jantan dan syaitan betina).<br>" +
+            "• <em>Doa Keluar</em>: <span class=\"font-semibold text-emerald-800\">\"غُفْرَانَكَ\"</span> (Aku memohon keampunan-Mu).<br>" +
+            "• <em>Larangan keras di bilik air</em>: Dilarang bercakap, makan, minum, bermain air, atau membaca ayat Al-Quran serta menyebut nama Allah di dalam bilik air.",
+            "<strong>3. Adab Makan dan Minum (ادب ماكن دان مينوم):</strong><br>" +
+            "• <em>Sebelum Makan</em>: Membasuh kedua-dua tangan sehingga bersih dengan sabun, duduk dengan tertib dan sopan di lantai atau kerusi, membaca Basmalah <span class=\"font-semibold text-emerald-800\">\"بِسْمِ اللَّهِ\"</span> serta membaca doa makan <span class=\"font-semibold text-emerald-800\">\"اللَّهُمَّ بَارِكْ لَنَا فِيمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ\"</span> (Ya Allah, berkatilah rezeki yang Engkau berikan kepada kami dan peliharalah kami daripada azab api neraka).<br>" +
+            "• <em>Semasa Makan</em>: Menggunakan tangan kanan (تاڠن كانن), mengambil makanan yang paling hampir dengan kita dahulu, tidak meniup makanan atau minuman yang masih panas (sebaliknya biarkan sejuk sendiri), serta dilarang sama sekali mencela atau merungut tentang makanan yang dihidangkan.<br>" +
+            "• <em>Selepas Makan</em>: Membaca doa kesyukuran <span class=\"font-semibold text-emerald-800\">\"الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ\"</span> (Segala puji bagi Allah yang telah memberi kami makan dan minum, serta menjadikan kami orang-orang Islam), membasuh tangan hingga bersih, dan membantu mengemas serta membersihkan tempat makan."
+          ],
+          tip: "Amalkan doa tidur dan doa makan setiap hari untuk mendapat keberkatan dan perlindungan Allah SWT."
+        },
+        2: {
+          title: "Adab Bersosial dalam Keluarga & Menuntut Ilmu",
+          summary: "Ulang kaji lengkap Adab Islam bagi Tahun 2 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM.",
+          points: [
+            "<strong>1. Adab kepada Ibu Bapa (ادب كڤد ايبو باڤ):</strong><br>" +
+            "• <em>Kewajipan Utama</em>: Patuh dan taat kepada segala arahan serta perintah ibu bapa selagi tidak melanggar syariat agama Islam.<br>" +
+            "• <em>Cara Bertutur</em>: Sentiasa bercakap dengan nada suara yang lembut, sopan, dan penuh hormat. Dilarang keras meninggikan suara (لاون: منتيڠڬيكن سوارا) atau membentak mereka.<br>" +
+            "• <em>Kasih Sayang</em>: Bersalam dan mencium tangan mereka sebagai tanda hormat, membantu meringankan beban tugas mereka di rumah, serta sentiasa mendoakan keampunan mereka setiap hari dengan lafaz <span class=\"font-semibold text-emerald-800\">\"رَّبِّ اغْفِرْ لِي وَلِوَالِدَيَّ\"</span> (Wahai Tuhanku, ampunilah dosaku dan dosa kedua ibu bapaku).",
+            "<strong>2. Adab kepada Ahli Keluarga & Adik-Beradik:</strong><br>" +
+            "• Menghormati ahli keluarga yang lebih tua (seperti abang, kakak, datuk, nenek, dan pakcik) serta menyayangi ahli keluarga yang lebih muda (seperti adik).<br>" +
+            "• Mengamalkan sikap bertolak ansur, bertutur dengan kata-kata yang sopan, tidak bergaduh, dan sentiasa bantu-membantu dalam perkara kebaikan.",
+            "<strong>3. Kesan Buruk Tidak Beradab kepada Keluarga:</strong><br>" +
+            "• Kehidupan keluarga akan kehilangan rahmat dan keberkatan daripada Allah SWT.<br>" +
+            "• Hubungan kekeluargaan menjadi kucar-kacir, renggang, dan dipenuhi pergaduhan.<br>" +
+            "• Individu yang menderhaka akan mendapat dosa besar serta dipandang hina oleh masyarakat sekeliling.",
+            "<strong>4. Adab Menuntut Ilmu di Sekolah (ادب منونوت علمو):</strong><br>" +
+            "• <em>Adab kepada Guru (ادب كڤد ڬورو)</em>: Sentiasa memberi salam dengan wajah yang manis apabila bertemu guru, menumpukan perhatian sepenuhnya semasa guru sedang mengajar di hadapan kelas, meminta izin dengan sopan sebelum keluar kelas, serta tidak memotong atau mencelah percakapan guru.<br>" +
+            "• <em>Adab terhadap Buku Teks & Bahan Belajar</em>: Menyimpan buku di tempat yang selamat dan bersih, memegang serta membuka helaian buku dengan cermat, tidak menconteng atau mengoyakkan isi penting dengan sengaja, dan membalut buku dengan pembalut plastik supaya tahan lama.<br>" +
+            "• <em>Hikmah Beradab Menuntut Ilmu</em>: Ilmu yang dipelajari menjadi mudah difahami dan diingati, mendapat keberkatan daripada Allah SWT, disayangi oleh semua guru dan rakan sekolah, serta mendapat ganjaran pahala yang besar."
+          ],
+          tip: "Hormati guru dan sayangi buku teks anda agar ilmu yang dipelajari mendapat berkat dunia dan akhirat."
+        },
+        3: {
+          title: "Adab Menziarahi Rakan, Jiran, Orang Sakit, Jenazah & Kubur",
+          summary: "Ulang kaji lengkap Adab Islam bagi Tahun 3 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM yang merangkumi adab bertamu serta ziarah orang sakit dan perkuburan.",
+          points: [
+            "<strong>1. Adab Menziarahi Rakan dan Jiran (ادب منزيارهي راكن دان جيرن):</strong><br>" +
+            "• <em>Pengertian Jiran (جيرن)</em>: Orang yang tinggal berdekatan dengan rumah kita sehingga 40 buah rumah dari setiap penjuru atau arah (kanan, kiri, depan, dan belakang).<br>" +
+            "• <em>Adab-adab ketika Menziarah</em>:<br>" +
+            "&nbsp;&nbsp;- Memilih waktu lawatan yang sesuai (elakkan waktu rehat, tidur, atau waktu makan keluarga jiran).<br>" +
+            "&nbsp;&nbsp;- Memberi salam <span class=\"font-semibold text-emerald-800\">\"السلام عليكم\"</span> serta mengetuk pintu dengan lembut maksimum sebanyak 3 kali. Sekiranya tiada jawapan, hendaklah beredar dengan tenang.<br>" +
+            "&nbsp;&nbsp;- Meminta izin dengan sopan sebelum melangkah masuk ke dalam rumah.<br>" +
+            "&nbsp;&nbsp;- Menjaga pandangan mata daripada melihat perkara-perkara yang tidak sepatutnya atau aib di dalam rumah tuan rumah.<br>" +
+            "&nbsp;&nbsp;- Bertamu mengikut keperluan dan tidak tinggal terlalu lama sehingga menyusahkan tuan rumah.<br>" +
+            "• <em>Hikmah Menjaga Adab Menziarah</em>: Memupuk semangat perpaduan dan persefahaman, mengeratkan hubungan silaturahim <span class=\"font-semibold text-emerald-800\">(صلة الرحم)</span>, mewujudkan suasana hidup yang aman tenteram, serta menjauhkan diri daripada api permusuhan dan salah faham.",
+
+            "<strong>2. Adab Menziarahi Orang Sakit (ادب منزيارهي اورڠ ساكيت):</strong><br>" +
+            "• <em>Adab-adab ketika Melawat Pesakit</em>:<br>" +
+            "&nbsp;&nbsp;- Memilih waktu lawatan yang bersesuaian dengan jadual rawatan dan rehat pesakit.<br>" +
+            "&nbsp;&nbsp;- Menggunakan kata-kata yang baik, sopan, lembut, dan menenangkan hati pesakit serta memberikan kata-kata semangat agar tabah menghadapi ujian.<br>" +
+            "&nbsp;&nbsp;- Mendoakan kesembuhan pesakit dengan doa sunnah Nabi SAW:<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"font-semibold text-emerald-800\">\"أَسْأَلُ اللَّهَ الْعَظِيمَ رَبَّ الْعَرْشِ الْعَظِيمِ أَنْ يَشْفِيَكَ\"</span><br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;<em>(Aku memohon kepada Allah yang Maha Agung, Tuhan Arasy yang Agung, agar menyembuhkanmu)</em>.<br>" +
+            "&nbsp;&nbsp;- Membawa buah tangan atau hadiah yang bersesuaian dan bermanfaat untuk pesakit.<br>" +
+            "&nbsp;&nbsp;- Tidak bising, tidak berbual dengan nada suara yang kuat, dan tidak duduk terlalu lama di bilik rawatan.<br>" +
+            "• <em>Akibat Tidak Beradab ketika Melawat</em>: Mengganggu ketenteraman rehat pesakit, menyinggung perasaan keluarga pesakit yang sedang bersedih, menimbulkan rasa tidak selesa kepada pesakit lain, serta boleh menghalang tugasan penting doktor atau jururawat.",
+
+            "<strong>3. Adab Menziarahi Jenazah dan Kubur (ادب منزيارهي جنازة دان قبور):</strong><br>" +
+            "• <em>Adab Menziarahi Jenazah (جنازة)</em>:<br>" +
+            "&nbsp;&nbsp;- Mengucapkan takziah <span class=\"font-semibold text-emerald-800\">(تعزية)</span> kepada keluarga si mati untuk mengurangkan kesedihan mereka.<br>" +
+            "&nbsp;&nbsp;- Menyembahyangkan jenazah (Solat Jenazah - صلوة جنازة) dan membantu mengiringi serta menguruskan proses pengebumian.<br>" +
+            "&nbsp;&nbsp;- Menghindari perbualan kosong, gurauan, ketawa, atau mengumpat di rumah jenazah.<br>" +
+            "&nbsp;&nbsp;- Menutup dan memelihara segala keaiban si mati daripada diceritakan kepada orang lain.<br>" +
+            "• <em>Adab Menziarahi Kubur (قبور)</em>:<br>" +
+            "&nbsp;&nbsp;- Memberi salam kepada ahli kubur sebaik tiba di perkuburan:<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"font-semibold text-emerald-800\">\"السَّلَامُ عَلَيْكُمْ دَارَ قَوْمٍ مُؤْمِنِينَ\"</span><br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;<em>(Sejahtera ke atas kamu wahai penghuni tempat orang-orang mukmin)</em>.<br>" +
+            "&nbsp;&nbsp;- Memakai pakaian yang sopan, bersih, dan menutup aurat dengan sempurna.<br>" +
+            "&nbsp;&nbsp;- Membaca tahlil, zikir, atau surah Yasin serta mendoakan keampunan bagi dosa si mati.<br>" +
+            "&nbsp;&nbsp;- Menjaga kebersihan kawasan perkuburan serta dilarang keras melangkah atau duduk di atas kubur."
+          ],
+          tip: "Amalkan adab bertamu, ziarah orang sakit, dan mendoakan ahli kubur untuk menyemai sifat kasih sayang sesama insan."
+        },
+        4: {
+          title: "Adab di Masjid (ادب دمسجد) & Adab Berhujah dan Bermusyawarah (ادب برحجه دان برمشوورة)",
+          summary: "Ulang kaji lengkap Adab Tahun 4 (UPKK): Etika rumah ibadah serta panduan berbincang dan bermesyuarat mengikut acuan syariat Islam.",
+          points: [
+            "<strong>1. Adab di Masjid (ادب دمسجد):</strong><br>" +
+            "• <em>Pengertian Masjid</em>: Rumah Allah SWT yang dibina khusus untuk menunaikan solat fardu, solat sunat, serta melakukan aktiviti ibadah dan penyatuan umat Islam.<br>" +
+            "• <em>Adab Masuk Masjid</em>: Berwuduk, memakai pakaian yang bersih, suci daripada najis dan menutup aurat dengan sempurna, melangkah masuk mendahului <strong>kaki kanan</strong>, serta membaca doa masuk masjid:<br>" +
+            "&nbsp;&nbsp;<span class=\"font-semibold text-emerald-800\">\"اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ\"</span><br>" +
+            "&nbsp;&nbsp;<em>(Ya Allah, bukakanlah bagiku pintu-pintu rahmat-Mu)</em>.<br>" +
+            "• <em>Amalan di Dalam Masjid</em>: Menunaikan solat sunat <strong>Tahiyyatul Masjid (تحية المسجد - 2 rakaat)</strong> sebelum duduk, berniat iktikaf (اعتكاف) di dalam hati, menyibukkan diri dengan membaca Al-Quran, berzikir, berselawat, menjaga ketenteraman (tidak bising/berlari), dan dilarang keras melakukan urusan jual beli atau mengumumkan barang hilang.<br>" +
+            "• <em>Adab Keluar Masjid</em>: Melangkah keluar dengan mendahului <strong>kaki kiri</strong> dengan tenang, serta membaca doa keluar masjid:<br>" +
+            "&nbsp;&nbsp;<span class=\"font-semibold text-emerald-800\">\"اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ\"</span><br>" +
+            "&nbsp;&nbsp;<em>(Ya Allah, sesungguhnya aku memohon daripada limpah kurnia-Mu)</em>.",
+
+            "<strong>2. Adab Berhujah dan Bermusyawarah (ادب برحجه دان برمشوورة):</strong><br>" +
+            "• <em>Adab Berhujah (Bercakap / Debat Sihat)</em>:<br>" +
+            "&nbsp;&nbsp;- Niat yang ikhlas kerana Allah SWT untuk menegakkan kebenaran, bukannya untuk menunjuk-nunjuk kepandaian atau menjatuhkan maruah orang lain.<br>" +
+            "&nbsp;&nbsp;- Menggunakan hujah yang benar, sahih, dan berasaskan ilmu serta fakta yang tepat.<br>" +
+            "&nbsp;&nbsp;- Menggunakan bahasa yang sopan, nada suara yang tenang, lembut, dan tidak menyinggung perasaan.<br>" +
+            "&nbsp;&nbsp;- Menghormati pandangan orang lain dan tidak memotong percakapan mereka dengan kasar.<br>" +
+            "&nbsp;&nbsp;- Mengawal emosi, tidak marah, serta bersedia menerima kebenaran sekiranya hujah sendiri didapati salah.<br>" +
+            "• <em>Adab Bermusyawarah (Bermesyuarat / Perbincangan Kumpulan)</em>:<br>" +
+            "&nbsp;&nbsp;- Berlapang dada dan reda menerima keputusan majoriti mesyuarat walaupun berbeza dengan pendapat peribadi.<br>" +
+            "&nbsp;&nbsp;- Berbincang dengan suasana harmoni, bertolak ansur, dan mengutamakan maslahah (kepentingan) umum.<br>" +
+            "&nbsp;&nbsp;- Bekerjasama dan komited melaksanakan segala keputusan yang telah dipersetujui bersama.",
+
+            "<strong>3. Hikmah Beradab ketika Berhujah dan Bermusyawarah:</strong><br>" +
+            "• Mengelakkan berlakunya perpecahan, permusuhan, dan salah faham dalam kalangan masyarakat.<br>" +
+            "• Dapat menghasilkan keputusan atau jalan penyelesaian yang terbaik, adil, dan matang.<br>" +
+            "• Membina ukhuwah (persaudaraan) yang kukuh serta mendapat keredaan dan keberkatan daripada Allah SWT."
+          ],
+          tip: "Hafaz doa masuk dan keluar masjid dengan sebutan yang betul serta fahami rukun hujah yang berasaskan kebenaran dan ilmu."
+        },
+        5: {
+          title: "Adab Bermusafir (ادب برمسافر), Adab Bernegara & Memelihara Kemudahan Awam (ادب برنڬارا)",
+          summary: "Ulang kaji lengkap Adab Tahun 5 (UPKK): Panduan keselamatan perjalanan jauh, tanggungjawab sivik bernegara, serta pemeliharaan harta benda awam.",
+          points: [
+            "<strong>1. Adab Bermusafir (ادب برمسافر):</strong><br>" +
+            "• <em>Pengertian Bermusafir</em>: Perjalanan keluar dari kawasan tempat tinggal (kediaman asal) menuju ke suatu tempat lain dengan tujuan yang baik serta bermanfaat mengikut syarak, dengan jarak perjalanan melebihi dua marhalah (iaitu kira-kira 85 kilometer atau lebih).<br>" +
+            "• <em>Adab Sebelum Bermusafir</em>:<br>" +
+            "&nbsp;&nbsp;- Memastikan tujuan bermusafir adalah perkara yang diharuskan atau dituntut oleh syarak (seperti menuntut ilmu, bekerja, menziarahi keluarga, atau menunaikan umrah/haji) dan bukannya untuk melakukan maksiat.<br>" +
+            "&nbsp;&nbsp;- Menyelesaikan hutang piutang yang tertunggak atau menyediakan peruntukan nafkah yang cukup bagi keluarga yang ditinggalkan.<br>" +
+            "&nbsp;&nbsp;- Memohon maaf dan restu daripada ibu bapa, keluarga, serta rakan terdekat.<br>" +
+            "&nbsp;&nbsp;- Membaca doa menaiki kenderaan dan doa musafir:<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"font-semibold text-emerald-800\">\"سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ وَإِنَّا إِلَى رَبِّنَا لَمُنْقَلِبُونَ\"</span><br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;<em>(Maha Suci Allah yang telah memudahkan kenderaan ini untuk kami, sedang kami sebelum ini tidak terdaya menguasainya, dan sesungguhnya kepada Tuhan kamilah kami akan kembali)</em>.<br>" +
+            "• <em>Adab Semasa Bermusafir</em>:<br>" +
+            "&nbsp;&nbsp;- Melantik seorang ketua (amir - أَمِير) sekiranya bergerak dalam kumpulan bagi memudahkan pengurusan urusan perjalanan.<br>" +
+            "&nbsp;&nbsp;- Memelihara solat fardu lima waktu dengan memanfaatkan kemudahan rukhshah (kelonggaran) syarak iaitu melakukan <strong>solat Jamak dan Qasar</strong>.<br>" +
+            "&nbsp;&nbsp;- Menjaga kebersihan persekitaran tempat persinggahan dan mematuhi undang-undang lalu lintas demi keselamatan diri serta orang lain.",
+
+            "<strong>2. Adab Bernegara dan Memelihara Kemudahan Awam (ادب برنڬارا):</strong><br>" +
+            "• <em>Adab Bernegara</em>:<br>" +
+            "&nbsp;&nbsp;- Mematuhi dan menghormati undang-undang serta peraturan negara selagi ia tidak bertentangan dengan syariat Islam.<br>" +
+            "&nbsp;&nbsp;- Menghormati pemimpin negara yang adil serta mendoakan kesejahteraan mereka.<br>" +
+            "&nbsp;&nbsp;- Memelihara keamanan, perpaduan, dan keharmonian hidup masyarakat berbilang kaum.<br>" +
+            "&nbsp;&nbsp;- Memupuk semangat patriotik, cinta akan tanah air, dan bersedia mempertahankan kedaulatan negara daripada ancaman luar.<br>" +
+            "• <em>Adab Memelihara Kemudahan Awam (Harta Benda Awam)</em>:<br>" +
+            "&nbsp;&nbsp;- Menggunakan kemudahan awam (seperti tandas awam, taman permainan, telefon awam, bas, perpustakaan) dengan cermat dan berhemah seperti harta sendiri.<br>" +
+            "&nbsp;&nbsp;- Menjaga kebersihan dan tidak melakukan <strong>vandalisme</strong> (seperti menconteng dinding, merosakkan peralatan, atau membuang sampah merata-rata).<br>" +
+            "&nbsp;&nbsp;- Segera melaporkan sebarang kerosakan kemudahan awam kepada pihak berkuasa atau pihak yang bertanggungjawab untuk tindakan pembaikan.",
+
+            "<strong>3. Akibat Mengabaikan Adab Bernegara dan Kemudahan Awam:</strong><br>" +
+            "• Negara menjadi mundur, kucar-kacir, hilang keharmonian, dan mudah terdedah kepada ancaman musuh.<br>" +
+            "• Imej umat Islam dan negara terjejas di mata dunia kerana kelihatan kotor dan tidak berdisiplin.<br>" +
+            "• Kerajaan terpaksa membazirkan wang negara yang banyak bagi kos pembaikan harta benda yang dirosakkan.<br>" +
+            "• Menyusahkan pengguna lain yang sangat memerlukan kemudahan tersebut untuk urusan harian."
+          ],
+          tip: "Kuasai syarat musafir melebihi 2 marhalah (~85km), hafaz doa musafir, serta fahami akibat buruk perbuatan vandalisme terhadap kemudahan awam."
+        }
+      },
+      "Jawi": {
+        1: {
+          title: "Mengenal Huruf Jawi Tunggal (حروف جاوي توڠڬل) & Vokal (ۏوكل)",
+          summary: "Ulang kaji lengkap Jawi Tahun 1 berdasarkan sukatan JAKIM KAFA 2.0: Kuasai 37 Huruf Tunggal serta padanan vokal suku kata terbuka.",
+          points: [
+            "<strong>1. 37 Huruf Jawi Tunggal (حروف جاوي توڠڬل):</strong><br>Murid wajib mengenal, menyebut dan menulis 37 bentuk huruf tunggal berikut:<br>" +
+            "• Alif (ا) • Ba (ب) • Ta (ت) • Ta Marbutah (ة) • Tha (ث) • Jim (ج) • Cha (چ) • Ha (ح) • Kha (خ) • Dal (د) • Dhal (ذ) • Ra (ر) • Zai (ز) • Sin (س) • Syin (ش) • Sad (ص) • Dad (ض) • Ta (ط) • Za (ظ) • Ain (ع) • Ghain (غ) • Ngain (ڠ) • Fa (ف) • Pa (ڤ) • Qaf (ق) • Kaf (ك) • Ga (ڬ) • Lam (ل) • Mim (م) • Nun (ن) • Wau (و) • Va (ۏ) • Ha (ه) • Hamzah (ء) • Ya (ي) • Ye (ى) • Nya (ڽ).",
+            "<strong>2. Huruf Vokal Jawi (حروف ۏوكل):</strong><br>Terdapat <strong>3 huruf vokal utama</strong> dalam tulisan Jawi yang menentukan bunyi suku kata terbuka:<br>" +
+            "• <strong>Alif (ا):</strong> Mewakili vokal [a]. Contoh: ba = با, ta = تا<br>" +
+            "• <strong>Wau (و):</strong> Mewakili vokal [u] dan [o]. Contoh: bu/bo = بو, du/do = دو<br>" +
+            "• <strong>Ya (ي):</strong> Mewakili vokal [i] dan [e taling]. Contoh: bi/be = بي, di/de = دي<br>" +
+            "• <strong>Vokal [e pepet]:</strong> Tiada huruf vokal ditulis (digugurkan). Contoh: be = ب, te = ت",
+            "<strong>3. Suku Kata Terbuka (سوکو کات تربوک):</strong><br>Suku kata yang diakhiri dengan salah satu huruf vokal Jawi (ا، و، ي). Contoh mudah pembentukan kata:<br>" +
+            "• با (ba) + جو (ju) = <strong>باجو (baju)</strong><br>" +
+            "• چو (cu) + چي (ci) = <strong>چوچي (cuci)</strong><br>" +
+            "• بو (bu) + كو (ku) = <strong>بوکو (buku)</strong>"
+          ],
+          tip: "Ingat bahawa huruf vokal e pepet tidak ditulis sama sekali dalam ejaan Jawi. Contohnya 'se' ditulis (س) sahaja."
+        },
+        2: {
+          title: "Suku Kata Tertutup (سوکو کات ترتوتوڤ) & Hukum Pola Vokal",
+          summary: "Panduan lengkap Jawi Tahun 2 mengikut sukatan JAKIM KAFA 2.0: Cara mengeja suku kata tertutup dan hukum pengguguran Alif.",
+          points: [
+            "<strong>1. Pengertian Suku Kata Tertutup:</strong><br>Suku kata yang diakhiri dengan huruf konsonan (selain daripada huruf vokal ا، و، ي). Contohnya perkataan 'tin', 'beg', 'but', dan 'jam'.",
+            "<strong>2. Hukum Vokal [a] dalam Suku Kata Tertutup:</strong><br>Apabila vokal [a] diapit oleh dua konsonan dalam suku kata tertutup, huruf Alif (ا) <strong>WAJIB DIGUGURKAN</strong> dalam ejaan Jawi.<br>" +
+            "• <em>Contoh 1:</em> d-a-n (dan) = <span class=\"text-[#ff8d70] line-through\">دان</span> ➜ <strong>دن</strong> (Alif digugurkan)<br>" +
+            "• <em>Contoh 2:</em> j-a-m (jam) = <strong>جم</strong> (Bukan <span class=\"text-[#ff8d70] line-through\">جام</span>)<br>" +
+            "• <em>Contoh 3:</em> b-a-n-g (bang) = <strong>بڠ</strong> (Bukan <span class=\"text-[#ff8d70] line-through\">باڠ</span>)<br>" +
+            "• <em>Contoh 4:</em> b-a-n-t-u (bantu) = ban (tertutup [a]) + tu (terbuka) = <strong>بنتو</strong>",
+            "<strong>3. Pola Vokal [u], [o], [i] & [e taling] Tertutup:</strong><br>Huruf vokal Wau (و) dan Ya (ي) <strong>KEKAL ditulis</strong> dalam suku kata tertutup:<br>" +
+            "• <em>Vokal [u/o] kekal Wau (و):</em> b-u-t (but) = <strong>بوت</strong>, t-o-n (ton) = <strong>تون</strong><br>" +
+            "• <em>Vokal [i/e taling] kekal Ya (ي):</em> t-i-n (tin) = <strong>تين</strong>, b-e-g (beg) = <strong>بيڬ</strong>",
+            "<strong>4. Dua Suku Kata Tertutup + Terbuka:</strong><br>Cara menggabungkan dua suku kata mengikut hukum masing-masing:<br>" +
+            "• m-a-s-a-k (masak) = ma (terbuka) + sak (tertutup [a] - gugur alif) = <strong>ماسق</strong><br>" +
+            "• k-e-p-a-l-a (kepala) = ke (e-pepet - tiada vokal) + pa (terbuka) + la (terbuka) = <strong>كڤالا</strong>"
+          ],
+          tip: "Pastikan anda menggugurkan huruf Alif (ا) apabila mengeja suku kata tertutup yang mempunyai bunyi vokal 'a' seperti dan ➜ دن!"
+        },
+        3: {
+          title: "Kaedah Ejaan Imbuhan (کاءيده ايجاءن ايمبوهن) & Kata Pinjaman Bahasa Arab (کات ڤينجمن بهاس عرب)",
+          summary: "Ulang kaji lengkap Jawi Tahun 3 berdasarkan sukatan JAKIM KAFA 2.0: Menguasai hukum imbuhan awalan, akhiran, serta kaedah ejaan kata pinjaman Arab.",
+          points: [
+            "<strong>1. Imbuhan Awalan (ايمبوهن اولن):</strong><br>" +
+            "• <strong>Imbuhan [se-] (سـ), [ke-] (كـ), [di-] (دـ):</strong> Ditulis rapat dengan kata dasar tanpa memasukkan huruf Alif (ا).<br>" +
+            "&nbsp;&nbsp;- sebuah (se + buah) = <strong>سبواه</strong> (Bukan <span class=\"text-[#ff8d70] line-through\">سَابواه</span>)<br>" +
+            "&nbsp;&nbsp;- ketua (ke + tua) = <strong>كتوا</strong> (Bukan <span class=\"text-[#ff8d70] line-through\">کَاتوا</span>)<br>" +
+            "&nbsp;&nbsp;- dibaca (di + baca) = <strong>دbaچ</strong> (Bukan <span class=\"text-[#ff8d70] line-through\">دَاباچ</span>)<br>" +
+            "• <strong>Imbuhan [ber-] (بر), [per-] (ڤر), [ter-] (تر):</strong> Ditulis rapat secara terus dengan kata dasar.<br>" +
+            "&nbsp;&nbsp;- berjalan = <strong>برجلن</strong>, pelajar = <strong>ڤلاجر</strong>, terbesar = <strong>تربسر</strong><br>" +
+            "• <strong>Imbuhan [peng-] (ڤڠ) dan [meng-] (مڠ):</strong> Apabila bertemu kata dasar bermula dengan huruf Alif (ا), huruf alif tersebut boleh diganti atau dikekalkan mengikut bunyi kata dasar.<br>" +
+            "&nbsp;&nbsp;- asuh ➜ pengasuh = <strong>ڤڠاسوه</strong>, ikat ➜ mengikat = <strong>مڠيكت</strong>",
+
+            "<strong>2. Imbuhan Akhiran (ايمبوهن اخيرن):</strong><br>" +
+            "• <strong>Imbuhan [-an] (ان / ن / ءن):</strong> Ditentukan secara khusus mengikut huruf akhir kata dasar:<br>" +
+            "&nbsp;&nbsp;1. Guna <strong>Hamzah-Nun (-ءن)</strong> jika kata dasar berakhir dengan vokal Alif (ا).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;• Contoh: baca (باچ) + an = <strong>باچاءن</strong><br>" +
+            "&nbsp;&nbsp;2. Guna <strong>Nun (-ن)</strong> jika kata dasar berakhir dengan vokal Wau (و).<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;• Contoh: bantu (بنتو) + an = <strong>بنتوان</strong><br>" +
+            "&nbsp;&nbsp;3. Guna <strong>Alif-Nun (-ان)</strong> jika kata dasar berakhir dengan huruf konsonan.<br>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;• Contoh: jalan (جلن) + an = <strong>جالنان</strong><br>" +
+            "• <strong>Imbuhan [-kan] (کن):</strong> Ditulis rapat di akhir kata dasar.<br>" +
+            "&nbsp;&nbsp;- masuk (ماسوق) + kan = <strong>ماسوقكن</strong>, rupa (روڤا) + kan = <strong>روڤاكن</strong>",
+
+            "<strong>3. Kata Pinjaman Bahasa Arab (کات ڤينجمن بهاس عرب):</strong><br>" +
+            "Terbahagi kepada dua kaedah ejaan utama mengikut ketetapan DBP/JAKIM:<br>" +
+            "• <strong>Kaedah 1 (Sistem Ta'rib):</strong> Kata pinjaman Arab yang menjadi Istilah Agama kekal dieja mengikut ejaan asal bahasa Arab tanpa sebarang perubahan huruf.<br>" +
+            "&nbsp;&nbsp;- solat = <strong>صلوة / صلاة</strong><br>" +
+            "&nbsp;&nbsp;- wuduk = <strong>وضوء</strong><br>" +
+            "&nbsp;&nbsp;- iman = <strong>ايمان</strong><br>" +
+            "&nbsp;&nbsp;- zakat = <strong>زكاة</strong><br>" +
+            "&nbsp;&nbsp;- rahmat = <strong>رحمة</strong><br>" +
+            "• <strong>Kaedah 2 (Sistem Tamsir):</strong> Kata umum bahasa Arab yang sudah diserap secara meluas menjadi bahasa harian Melayu dieja mengikut sebutan bunyi bahasa Melayu.<br>" +
+            "&nbsp;&nbsp;- sabun = <strong>سابون</strong><br>" +
+            "&nbsp;&nbsp;- kertas = <strong>قرطاس</strong><br>" +
+            "&nbsp;&nbsp;- kubur = <strong>قبور</strong>"
+          ],
+          tip: "Perhatikan huruf terakhir kata dasar sebelum meletakkan imbuhan akhiran '-an' sama ada menggunakan ءن, ن, atau ان."
+        },
+        4: {
+          title: "Kedudukan Huruf Hamzah (کدودوقن حروف همزه) & Perkataan Homograf (کات هوموڬراف)",
+          summary: "Ulang kaji lengkap Jawi Tahun 4 (UPKK) merangkumi 5 kedudukan huruf Hamzah serta peraturan penting homograf.",
+          points: [
+            "<strong>1. Kedudukan Huruf Hamzah (کدودوقن حروف همزه) - 5 Kedudukan Utama:</strong><br>" +
+            "• <strong>A. Hamzah di atas huruf Alif (أ):</strong> Digunakan pada kata dasar awalan [se-], [ke-], [di-] yang bertemu kata dasar bermula dengan huruf Alif. Juga untuk kata seruan.<br>" +
+            "&nbsp;&nbsp;- se + utas ➜ <strong>سأوتس</strong><br>" +
+            "&nbsp;&nbsp;- ke + amatan ➜ <strong>كأمتن</strong><br>" +
+            "&nbsp;&nbsp;- di + atas ➜ <strong>دأتس</strong><br>" +
+            "&nbsp;&nbsp;- Kata seruan: \"أوه\" (Oh), \"أيه\" (Eh).<br>" +
+            "• <strong>B. Hamzah di bawah huruf Alif (إ):</strong> Digunakan khusus untuk kata pinjaman Barat/Arab tertentu.<br>" +
+            "&nbsp;&nbsp;- Islam ➜ <strong>إسلام</strong>, bapa saudara ➜ <strong>إيڤي</strong>.<br>" +
+            "• <strong>C. Hamzah 3/4 (تڬ ڤرامڤت دري ڬاريسن):</strong> Kedudukan paling popular dalam bahasa Melayu. Digunakan untuk imbuhan akhir (-ءن) atau kata ganti nama (-ءث).<br>" +
+            "&nbsp;&nbsp;- bacaan ➜ <strong>باچاءن</strong>, kainnya ➜ <strong>كاءينءث</strong>, nama khas Cina: \"تڠءو\" (Tengku).<br>" +
+            "• <strong>D. Hamzah sejajar / atas garisan (ء):</strong> Digunakan untuk kata pinjaman bahasa Arab asli.<br>" +
+            "&nbsp;&nbsp;- ulama ➜ <strong>علماء</strong>, wuduk ➜ <strong>وضوء</strong>, istinja ➜ <strong>استنجاء</strong>.<br>" +
+            "• <strong>E. Hamzah berumah (ئ):</strong> Digunakan jika huruf sebelum atau selepasnya memerlukan rumah sambungan.<br>" +
+            "&nbsp;&nbsp;- malaikat ➜ <strong>ملائكة</strong>, masalah ➜ <strong>مسألة / مسـئلة</strong>.",
+            "<strong>2. Perkataan Homograf (کات هوموڬراف):</strong><br>" +
+            "• <em>Pengertian</em>: Dua kata atau lebih yang mempunyai ejaan Jawi yang SAMA (سام) tetapi mempunyai sebutan bunyi dan makna yang BERBEZA (بربيزا). Murid perlu faham konteks ayat untuk membacanya dengan tepat.<br>" +
+            "• <strong>Contoh Popular Homograf UPKK:</strong><br>" +
+            "&nbsp;&nbsp;- <strong>بيل</strong> : Boleh dibaca sebagai \"Bela\" atau \"Bel\" (Bila).<br>" +
+            "&nbsp;&nbsp;- <strong>منتڠ</strong> : Boleh dibaca sebagai \"Mentang\" atau \"Matang\".<br>" +
+            "&nbsp;&nbsp;- <strong>سوري</strong> : Boleh dibaca sebagai \"Suri\" atau \"Sore\" (Petang).<br>" +
+            "&nbsp;&nbsp;- <strong>بيسا</strong> : Boleh dibaca sebagai \"Bisa\" (Racun) atau \"Bisa\" (Boleh)."
+          ],
+          tip: "Hafaz 5 kedudukan Hamzah (atas Alif, bawah Alif, 3/4, sejajar garisan, dan berumah) serta kuasai padanan contohnya untuk soalan UPKK."
+        },
+        5: {
+          title: "Hukum 'Ka' dan 'Ga' (حکوم کا دان ڬا) & Jenis Khat Warisan",
+          summary: "Ulang kaji lengkap Jawi Tahun 5 (UPKK) mengenai pengguguran Alif suku kata akhir dan pengenalan seni tulisan Khat.",
+          points: [
+            "<strong>1. Kaedah Ejaan Suku Kata Hukum 'Ka' dan 'Ga' (حکوم کا دان ڬا):</strong><br>" +
+            "• <em>Peraturan Utama Melayu asli</em>: Perkataan bahasa Melayu asli yang berakhir dengan bunyi 'ka' atau 'ga' di suku kata terbuka akhir, huruf Alif (ا) <strong>WAJIB DIGUGURKAN</strong> (tidak ditulis).<br>" +
+            "• <strong>Contoh Suku Kata Akhir Bunyi 'Ka':</strong><br>" +
+            "&nbsp;&nbsp;- c-u-k-a (cuka) ➜ <span class=\"text-[#ff8d70] line-through\">چوکا</span> (Salah) | <strong>چوک</strong> (Betul).<br>" +
+            "&nbsp;&nbsp;- l-u-k-a (luka) ➜ <strong>لوک</strong>, b-a-k-a (baka) ➜ <strong>باک</strong>, n-a-n-g-k-a (nangka) ➜ <strong>نڠک</strong>.<br>" +
+            "• <strong>Contoh Suku Kata Akhir Bunyi 'Ga':</strong><br>" +
+            "&nbsp;&nbsp;- r-a-g-a (raga) ➜ <span class=\"text-[#ff8d70] line-through\">راڬا</span> (Salah) | <strong>راڬ</strong> (Betul).<br>" +
+            "&nbsp;&nbsp;- t-i-g-a (tiga) ➜ <strong>تيڬ</strong>, s-e-g-a (sega) ➜ <strong>سڬ</strong>, d-e-r-g-a (derga) ➜ <strong>درڬ</strong>.<br>" +
+            "• <strong>Pengecualian:</strong> Perkataan pinjaman bahasa Inggeris/Barat kekal ditulis huruf Alif. Contoh: t-e-k-s-i (teksi), a-g-e-n-d-a (agenda) ➜ <strong>اڬيندا</strong>.",
+            "<strong>2. Penulisan Teks Grafik Dan Khat Ringkas:</strong><br>" +
+            "• Pengenalan jenis khat utama dalam sukatan KAFA:<br>" +
+            "&nbsp;&nbsp;- <strong>Khat Nasakh (خط نسخ):</strong> Digunakan secara meluas untuk penulisan rasmi buku teks, akhbar, dan mushaf Al-Quran kerana sifatnya yang sangat jelas dan mudah dibaca.<br>" +
+            "&nbsp;&nbsp;- <strong>Khat Rikaah (خط رقعة):</strong> Digunakan untuk penulisan cepat, nota harian, tajuk utama, atau catatan ringkas kerana bentuk hurufnya yang ringkas, condong, dan menjimatkan ruang."
+          ],
+          tip: "Ingat! Gugurkan huruf Alif di akhir kata bagi semua bunyi 'ka' dan 'ga' Melayu asli seperti suka ➜ سوک, raga ➜ راڬ."
+        }
+      },
+      "Bahasa Arab": {
+        1: {
+          title: "Huruf Hijaiyyah Bertanda, Nombor & Anggota Badan",
+          summary: "Ulang kaji lengkap Bahasa Arab Tahun 1 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM.",
+          points: [
+            "<strong>1. Huruf Hijaiyyah Bertanda (الْحُرُوفُ الْهِجَائِيَّةُ بِالْحَرَكَاتِ):</strong><br>" +
+            "Murid mengenal sebutan dan baris asas pada huruf hijaiyyah:<br>" +
+            "• Baris Atas (Fathah َ) - Bunyi vokal 'a'. Contoh: <span class=\"font-semibold text-lg text-emerald-800\">بَ</span> (Ba)<br>" +
+            "• Baris Bawah (Kasrah ِ) - Bunyi vokal 'i'. Contoh: <span class=\"font-semibold text-lg text-emerald-800\">بِ</span> (Bi)<br>" +
+            "• Baris Depan (Dammah ُ) - Bunyi vokal 'u'. Contoh: <span class=\"font-semibold text-lg text-emerald-800\">بُ</span> (Bu)<br>" +
+            "• Tanda Mati (Sukun ْ) - Contoh: <span class=\"font-semibold text-lg text-emerald-800\">بْ</span> (Tanda sukun/mati)<br>" +
+            "• Tanda Sabdu (Syaddah ّ) - Contoh: <span class=\"font-semibold text-lg text-emerald-800\">بّ</span> (Bunyi bersabdu/tebal/ganda)",
+            "<strong>2. Nombor dan Bilangan 1-10 (الأَعْدَادُ وَالأَرْقَامُ ١-١٠):</strong><br>" +
+            "Hafal sebutan nombor satu hingga sepuluh dalam Bahasa Arab:<br>" +
+            "• ١ : <span class=\"font-semibold text-emerald-800\">وَاحِدٌ</span> (Satu)<br>" +
+            "• ٢ : <span class=\"font-semibold text-emerald-800\">اِثْنَانِ</span> (Dua)<br>" +
+            "• ٣ : <span class=\"font-semibold text-emerald-800\">ثَلَاثَةٌ</span> (Tiga)<br>" +
+            "• ٤ : <span class=\"font-semibold text-emerald-800\">أَرْبَعَةٌ</span> (Empat)<br>" +
+            "• ٥ : <span class=\"font-semibold text-emerald-800\">خَمْسَةٌ</span> (Lima)<br>" +
+            "• ٦ : <span class=\"font-semibold text-emerald-800\">سِتَّةٌ</span> (Enam)<br>" +
+            "• ٧ : <span class=\"font-semibold text-emerald-800\">سَبْعَةٌ</span> (Tujuh)<br>" +
+            "• ٨ : <span class=\"font-semibold text-emerald-800\">ثَمَانِيَةٌ</span> (Lapan)<br>" +
+            "• ٩ : <span class=\"font-semibold text-emerald-800\">تِسْعَةٌ</span> (Sembilan)<br>" +
+            "• ١٠ : <span class=\"font-semibold text-emerald-800\">عَشَرَةٌ</span> (Sepuluh)",
+            "<strong>3. Anggota Badan (أَعْضَاءُ الْجِسْمِ):</strong><br>" +
+            "Kosa kata asas bahagian tubuh manusia:<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">رَأْسٌ</span> (Kepala)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">شَعْرٌ</span> (Rambut)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">عَيْنٌ</span> (Mata)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">أُذُنٌ</span> (Telinga)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">أَنْفٌ</span> (Hidung)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">فَمٌ</span> (Mulut)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">لِسَانٌ</span> (Lidah)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">يَدٌ</span> (Tangan)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">رِجْلٌ</span> (Kaki)",
+            "<strong>4. Komunikasi Asas & Ucapan Harian (الحِوَارُ وَالتَّحِيَّاتُ):</strong><br>" +
+            "<table class=\"w-full text-xs text-left mt-2 border-collapse border border-emerald-100\">" +
+            "  <thead>" +
+            "    <tr class=\"bg-emerald-50\">" +
+            "      <th class=\"p-1.5 border border-emerald-100\">Ucapan & Jawab</th>" +
+            "      <th class=\"p-1.5 border border-emerald-100 text-right\">العربية</th>" +
+            "      <th class=\"p-1.5 border border-emerald-100\">Maksud</th>" +
+            "    </tr>" +
+            "  </thead>" +
+            "  <tbody>" +
+            "    <tr>" +
+            "      <td class=\"p-1.5 border border-emerald-100 font-semibold\">اَلسَّلَامُ عَلَيْكُمْ</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\">اَلسَّلَامُ عَلَيْكُمْ</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100\">Selamat sejahtera</td>" +
+            "    </tr>" +
+            "    <tr class=\"bg-emerald-50/30\">" +
+            "      <td class=\"p-1.5 border border-emerald-100 font-semibold\">Jawab</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\">وَعَلَيْكُمُ السَّلَامُ</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100\">Dan ke atas kamu sejahtera</td>" +
+            "    </tr>" +
+            "    <tr>" +
+            "      <td class=\"p-1.5 border border-emerald-100 font-semibold\">صَبَاحَ الْخَيْرِ</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\">صَبَاحَ الْخَيْرِ</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100\">Selamat pagi</td>" +
+            "    </tr>" +
+            "    <tr class=\"bg-emerald-50/30\">" +
+            "      <td class=\"p-1.5 border border-emerald-100 font-semibold\">Jawab</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\">صَبَاحَ النُّورِ</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100\">Selamat pagi juga</td>" +
+            "    </tr>" +
+            "    <tr>" +
+            "      <td class=\"p-1.5 border border-emerald-100 font-semibold\">أَهْلًا وَسَهْلًا</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\">أَهْلًا وَسَهْلًا</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100\">Selamat datang</td>" +
+            "    </tr>" +
+            "    <tr class=\"bg-emerald-50/30\">" +
+            "      <td class=\"p-1.5 border border-emerald-100 font-semibold\">Jawab</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\">أَهْلًا بِكَ</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100\">Selamat datang juga</td>" +
+            "    </tr>" +
+            "    <tr>" +
+            "      <td class=\"p-1.5 border border-emerald-100 font-semibold\">شُكْرًا</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\">شُكْرًا</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100\">Terima kasih</td>" +
+            "    </tr>" +
+            "    <tr class=\"bg-emerald-50/30\">" +
+            "      <td class=\"p-1.5 border border-emerald-100 font-semibold\">Jawab</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\">عَفْوًا</td>" +
+            "      <td class=\"p-1.5 border border-emerald-100\">Sama-sama</td>" +
+            "    </tr>" +
+            "  </tbody>" +
+            "</table>"
+          ],
+          tip: "Sebut nombor 1-10 secara berulang-ulang mengikut irama lagu untuk memudahkan hafazan."
+        },
+        2: {
+          title: "Ahli Keluarga, Peralatan Kelas & Kata Tunjuk",
+          summary: "Ulang kaji lengkap Bahasa Arab Tahun 2 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM.",
+          points: [
+            "<strong>1. Ahli Keluarga Saya (أَفْرَادُ الْعَائِلَةِ):</strong><br>" +
+            "Kosa kata memperkenalkan ahli keluarga terdekat:<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">أَبٌ</span> (Bapa)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">أُمٌّ</span> (Ibu)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">جَدٌّ</span> (Datuk)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">جَدَّةٌ</span> (Nenek)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">أَخٌ</span> (Saudara Lelaki)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">أُخْتٌ</span> (Saudara Perempuan)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">عَمٌّ</span> (Bapa Saudara sebelah bapa)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">عَمَّةٌ</span> (Emak Saudara sebelah bapa)",
+            "<strong>2. Peralatan di dalam Kelas (الأَدَاوَاتُ الْفَصْلِيَّةُ):</strong><br>" +
+            "Kenal nama peralatan sekolah di dalam bilik darjah:<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">قَلَمٌ</span> (Pena/Pen)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">كِتَابٌ</span> (Buku)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">دَفْتَرٌ</span> (Buku Nota)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">مِسْطَرَةٌ</span> (Pembaris)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">مِمْحَاةٌ</span> (Pemadam)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">حَقِيبَةٌ</span> (Beg)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">مَكْتَبٌ</span> (Meja)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">كُرْسِيٌّ</span> (Kerusi)<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">سَبُّورَةٌ</span> (Papan Hitam/Putih)",
+            "<strong>3. Pengenalan Kata Tunjuk Asas (أَسْمَاءُ الإِشَارَةِ):</strong><br>" +
+            "Gunakan kata isyarat mengikut jantina kata nama:<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">هَذَا</span> (Ini - digunakan untuk Lelaki/Muzakkar, tiada ta marbutah ة di hujung kata).<br>" +
+            "&nbsp;&nbsp;Contoh: <span class=\"font-semibold text-emerald-800\">هَذَا قَلَمٌ</span> (Ini pen).<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">هَذِهِ</span> (Ini - digunakan untuk Perempuan/Muannas, biasanya diakhiri dengan ta marbutah ة).<br>" +
+            "&nbsp;&nbsp;Contoh: <span class=\"font-semibold text-emerald-800\">هَذِهِ مِسْطَرَةٌ</span> (Ini pembaris)." +
+            "\",\n" +
+            "            \"<strong>4. Komunikasi Asas & Ucapan Harian (الحِوَارُ وَالتَّحِيَّاتُ):</strong><br>\" +" +
+            "            \"<table class=\\\"w-full text-xs text-left mt-2 border-collapse border border-emerald-100\\\">\" +" +
+            "            \"  <thead>\" +" +
+            "            \"    <tr class=\\\"bg-emerald-50\\\">\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100\\\">Ucapan & Jawab</th>\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100 text-right\\\">العربية</th>\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100\\\">Maksud</th>\" +" +
+            "            \"    </tr>\" +" +
+            "            \"  </thead>\" +" +
+            "            \"  <tbody>\" +" +
+            "            \"    <tr>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">مَسَاءَ الْخَيْرِ</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">مَسَاءَ الْخَيْرِ</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100\\\">Selamat petang</td>\" +" +
+            "            \"    </tr>\" +" +
+            "            \"    <tr class=\\\"bg-emerald-50/30\\\">\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Jawab</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">مَسَاءَ النُّورِ</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100\\\">Selamat petang juga</td>\" +" +
+            "            \"    </tr>\" +" +
+            "            \"    <tr>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">اَلسَّلَامُ عَلَيْكُمْ</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">اَلسَّلَامُ عَلَيْكُمْ</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100\\\">Selamat sejahtera</td>\" +" +
+            "            \"    </tr>\" +" +
+            "            \"    <tr class=\\\"bg-emerald-50/30\\\">\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Jawab</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">وَعَلَيْكُمُ السَّلَامُ</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100\\\">Dan ke atas kamu sejahtera</td>\" +" +
+            "            \"    </tr>\" +" +
+            "            \"  </tbody>\" +" +
+            "            \"</table>\""
+          ],
+          tip: "Gunakan 'haza' bagi perkataan tanpa ta-marbutah dan 'hazihi' bagi perkataan yang diakhiri dengan ta-marbutah (ة)."
+        },
+        3: {
+          title: "Nombor, Warna, Makanan & Kata Tanya Asas",
+          summary: "Ulang kaji lengkap Bahasa Arab Tahun 3 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM.",
+          points: [
+            "<strong>1. Nombor dan Bilangan 11-20 (الأَعْدَادُ وَالأَرْقَامُ ١١-٢٠):</strong><br>" +
+            "• ١١ : <span class=\"font-semibold text-emerald-800\">أَحَدَ عَشَرَ</span> (Sebelas)<br>" +
+            "• ١٢ : <span class=\"font-semibold text-emerald-800\">اِثْنَا عَشَرَ</span> (Dua belas)<br>" +
+            "• ١٣ : <span class=\"font-semibold text-emerald-800\">ثَلَاثَةَ عَشَرَ</span> (Tiga belas)<br>" +
+            "• ١٤ : <span class=\"font-semibold text-emerald-800\">أَرْبَعَةَ عَشَرَ</span> (Empat belas)<br>" +
+            "• ١٥ : <span class=\"font-semibold text-emerald-800\">خَمْسَةَ عَشَرَ</span> (Lima belas)<br>" +
+            "• ١٦ : <span class=\"font-semibold text-emerald-800\">سِتَّةَ عَشَرَ</span> (Enam belas)<br>" +
+            "• ١٧ : <span class=\"font-semibold text-emerald-800\">سَبْعَةَ عَشَرَ</span> (Tujuh belas)<br>" +
+            "• ١٨ : <span class=\"font-semibold text-emerald-800\">ثَمَانِيَةَ عَشَرَ</span> (Lapan belas)<br>" +
+            "• ١٩ : <span class=\"font-semibold text-emerald-800\">تِسْعَةَ عَشَرَ</span> (Sembilan belas)<br>" +
+            "• ٢٠ : <span class=\"font-semibold text-emerald-800\">عِشْرُونَ</span> (Dua puluh)",
+            "<strong>2. Warna-warna (الأَلْوَانُ) - Muzakkar (M) & Muannas (F):</strong><br>" +
+            "• Merah: <span class=\"font-semibold text-emerald-800\">أَحْمَرُ</span> (M) / <span class=\"font-semibold text-emerald-800\">حَمْرَاءُ</span> (F)<br>" +
+            "• Biru: <span class=\"font-semibold text-emerald-800\">أَزْرَقُ</span> (M) / <span class=\"font-semibold text-emerald-800\">زَرْقَاءُ</span> (F)<br>" +
+            "• Hijau: <span class=\"font-semibold text-emerald-800\">أَخْضَرُ</span> (M) / <span class=\"font-semibold text-emerald-800\">خَضْرَاءُ</span> (F)<br>" +
+            "• Kuning: <span class=\"font-semibold text-emerald-800\">أَصْفَرُ</span> (M) / <span class=\"font-semibold text-emerald-800\">صَفْرَاءُ</span> (F)<br>" +
+            "• Hitam: <span class=\"font-semibold text-emerald-800\">أَسْوَدُ</span> (M) / <span class=\"font-semibold text-emerald-800\">سَوْدَاءُ</span> (F)<br>" +
+            "• Putih: <span class=\"font-semibold text-emerald-800\">أَبْيَضُ</span> (M) / <span class=\"font-semibold text-emerald-800\">بَيْضَاءُ</span> (F)",
+            "<strong>3. Sayur-sayuran dan Buah-buahan (الْخَضْرَاوَاتُ وَالْفَوَاكِهُ):</strong><br>" +
+            "• <em>Buah-buahan (الْفَوَاكِهُ)</em>:<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">تُفَّاحٌ</span> (Epal)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">مَوْزٌ</span> (Pisang)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">بُرْتُقَالٌ</span> (Oren)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">عِنَبٌ</span> (Anggur)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">بَطِّيخٌ</span> (Tembikai)<br>" +
+            "• <em>Sayur-sayuran (الْخَضْرَاوَاتُ)</em>:<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">طَمَاطِمُ</span> (Tomato)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">جَزَرٌ</span> (Lobak)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">بَطَاطِسُ</span> (Ubi Kentang)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">بَصَلٌ</span> (Bawang)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">خِيَارٌ</span> (Timun)",
+            "<strong>4. Kata Tanya Asas (أَدَاوَاتُ الِاسْتِفْهَامِ):</strong><br>" +
+            "• <span class=\"font-semibold text-emerald-800\">مَا</span> (Apa)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">مَنْ</span> (Siapa)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">هَلْ</span> (Adakah)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">أَيْنَ</span> (Di mana)<br>" +
+            "• <em>Contoh Ayat</em>:<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">مَنْ هَذَا؟ هَذَا جَدٌّ</span> (Siapa ini? Ini datuk).<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">هَلْ هَذَا كِتَابٌ؟ نَعَمْ</span> (Adakah ini buku? Ya)." +
+            "\",\n" +
+            "            \"<strong>5. Komunikasi Asas & Ucapan Harian (الحِوَارُ وَالتَّحِيَّاتُ):</strong><br>\" +" +
+            "            \"<table class=\\\"w-full text-xs text-left mt-2 border-collapse border border-emerald-100\\\">\" +" +
+            "            \"  <thead>\" +" +
+            "            \"    <tr class=\\\"bg-emerald-50\\\">\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100\\\">Soalan / Ucapan</th>\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100 text-right\\\">العربية</th>\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100\\\">Maksud / Jawab</th>\" +" +
+            "            \"    </tr>\" +" +
+            "            \"  </thead>\" +" +
+            "            \"  <tbody>\" +" +
+            "            \"    <tr>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Siapa namamu? (L)</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">مَا اسْمُكَ؟</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100\\\">Jawab: اِسْمِي... (Nama saya...)</td>\" +" +
+            "            \"    </tr>\" +" +
+            "            \"    <tr class=\\\"bg-emerald-50/30\\\">\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Siapa namamu? (P)</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">مَا اسْمُكِ؟</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100\\\">Jawab: اِسْمِي... (Nama saya...)</td>\" +" +
+            "            \"    </tr>\" +" +
+            "            \"    <tr>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Apa khabar? (L)</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">كَيْفَ حَالُكَ؟</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100\\\">Jawab: أَنَا بِخَيْرٍ، وَالْحَمْدُ لِلَّهِ</td>\" +" +
+            "            \"    </tr>\" +" +
+            "            \"    <tr class=\\\"bg-emerald-50/30\\\">\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Apa khabar? (P)</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">كَيْفَ حَالُكِ؟</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100\\\">Jawab: أَنَا بِخَيْرٍ، وَالْحَمْدُ لِلَّهِ</td>\" +" +
+            "            \"    </tr>\" +" +
+            "            \"    <tr>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Selamat tinggal</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">إِلَى اللِّقَاءِ</td>\" +" +
+            "            \"      <td class=\\\"p-1.5 border border-emerald-100\\\">Jawab: مَعَ السَّلَامَةِ</td>\" +" +
+            "            \"    </tr>\" +" +
+            "  </tbody>\" +" +
+            "</table>\""
+          ],
+          tip: "Bagi warna, pastikan anda membezakan kata sifat untuk benda jenis lelaki (Muzakkar) dan perempuan (Muannas)."
+        },
+        4: {
+          title: "Nombor Puluh (٣٠-١٠٠), Kata Ganti Nama & Haiwan",
+          summary: "Ulang kaji lengkap Bahasa Arab Tahun 4 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM: Kuasai asas penting tata bahasa (Dhamir) dan kosa kata UPKK.",
+          points: [
+            "<strong>1. Nombor dan Bilangan Puluh 30-100 (الأَعْدَادُ وَالأَرْقَامُ ٣٠-١٠٠):</strong><br>" +
+            "Hafal sebutan puluh gandaan sepuluh serta ejaan rasmi berikut:<br>" +
+            "• ٣٠ : <span class=\"font-semibold text-emerald-800\">ثَلَاثُونَ</span> (Tiga puluh)<br>" +
+            "• ٤٠ : <span class=\"font-semibold text-emerald-800\">أَرْبَعُونَ</span> (Empat puluh)<br>" +
+            "• ٥٠ : <span class=\"font-semibold text-emerald-800\">خَمْسُونَ</span> (Lima puluh)<br>" +
+            "• ٦٠ : <span class=\"font-semibold text-emerald-800\">سِتُّونَ</span> (Enam puluh)<br>" +
+            "• ٧٠ : <span class=\"font-semibold text-emerald-800\">سَبْعُونَ</span> (Tujuh puluh)<br>" +
+            "• ٨٠ : <span class=\"font-semibold text-emerald-800\">ثَمَانُونَ</span> (Lapan puluh)<br>" +
+            "• ٩٠ : <span class=\"font-semibold text-emerald-800\">تِسْعُونَ</span> (Sembilan puluh)<br>" +
+            "• ١٠٠ : <span class=\"font-semibold text-emerald-800\">مِائَةٌ</span> (Seratus)",
+            "<strong>2. Kata Ganti Nama Diri Asas / Dhamir (الضَّمَائِرُ الأَسَاسِيَّةُ):</strong><br>" +
+            "Kuasai kata ganti nama mengikut pembahagian jantina (Muzakkar & Muannas):<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">أَنَا</span> (Saya) - Digunakan untuk Lelaki (Muzakkar) & Perempuan (Muannas).<br>" +
+            "&nbsp;&nbsp;Contoh: <span class=\"font-semibold text-emerald-800\">أَنَا تِلْمِيذٌ</span> (Saya murid lelaki) | <span class=\"font-semibold text-emerald-800\">أَنَا تِلْمِيذَةٌ</span> (Saya murid perempuan).<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">نَحْنُ</span> (Kami / Kita) - Untuk kumpulan lelaki atau perempuan.<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">أَنْتَ</span> (Awak / Kamu - Lelaki/Muzakkar).<br>" +
+            "&nbsp;&nbsp;Contoh: <span class=\"font-semibold text-emerald-800\">أَنْتَ صَدِيقِي</span> (Awak sahabat lelaki saya).<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">أَنْتِ</span> (Awak / Kamu - Perempuan/Muannas).<br>" +
+            "&nbsp;&nbsp;Contoh: <span class=\"font-semibold text-emerald-800\">أَنْتِ أُخْتِي</span> (Awak saudara perempuan saya).<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">هُوَ</span> (Dia - Lelaki/Muzakkar).<br>" +
+            "&nbsp;&nbsp;Contoh: <span class=\"font-semibold text-emerald-800\">هُوَ مُعَلِّمٌ</span> (Dia seorang guru lelaki).<br>" +
+            "• <span class=\"font-semibold text-lg text-emerald-800\">هِيَ</span> (Dia - Perempuan/Muannas).<br>" +
+            "&nbsp;&nbsp;Contoh: <span class=\"font-semibold text-emerald-800\">هِيَ أُمٌّ</span> (Dia seorang ibu).",
+            "<strong>3. Nama Haiwan-haiwan (الْحَيَوَانَاتُ):</strong><br>" +
+            "Kosa kata popular haiwan jinak dan liar dalam peperiksaan UPKK:<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">أَسَدٌ</span> (Singa)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">فِيلٌ</span> (Gajah)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">قِرْدٌ</span> (Monyet)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">قِطٌّ</span> (Kucing)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">كَلْبٌ</span> (Anjing)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">دَجَاجَةٌ</span> (Ayam)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">بَقَرَةٌ</span> (Lembu)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">غَنَمٌ</span> (Kambing)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">طَائِرٌ</span> (Burung)" +
+            "\",\n" +
+            "            \"<strong>4. Komunikasi Asas & Ucapan Harian (الحِوَارُ وَالتَّحِيَّاتُ):</strong><br>\" +" +
+            "            \"<table class=\\\"w-full text-xs text-left mt-2 border-collapse border border-emerald-100\\\">\" +" +
+            "            \"  <thead>\" +" +
+            "            \"    <tr class=\\\"bg-emerald-50\\\">\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100\\\">Soalan & Jawab</th>\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100 text-right\\\">العربية</th>\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100\\\">Maksud</th>\" +" +
+            "            \"    </tr>\" +" +
+            "  </thead>\" +" +
+            "  <tbody>\" +" +
+            "    <tr>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Berapakah umurmu?</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">كَمْ عُمْرُكَ؟</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100\\\">Jawab: عُمْرِي سَنَوَاتٌ... (Umur saya...)</td>\" +" +
+            "    </tr>\" +" +
+            "    <tr class=\\\"bg-emerald-50/30\\\">\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Dari manakah kamu?</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">مِنْ أَيْنَ أَنْتَ؟</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100\\\">Jawab: أَنَا مِنْ مَالِيزِيَا (Saya dari Malaysia)</td>\" +" +
+            "    </tr>\" +" +
+            "    <tr>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Silakan (L)</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">تَفَضَّلْ</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100\\\">Mempersilakan seorang lelaki</td>\" +" +
+            "    </tr>\" +" +
+            "    <tr class=\\\"bg-emerald-50/30\\\">\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Silakan (P)</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">تَفَضَّلِي</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100\\\">Mempersilakan seorang perempuan</td>\" +" +
+            "    </tr>\" +" +
+            "  </tbody>\" +" +
+            "</table>\""
+          ],
+          tip: "Bagi UPKK, beri perhatian kepada pertukaran baris fathah (أَنْتَ) untuk lelaki dan kasrah (أَنْتِ) untuk perempuan."
+        },
+        5: {
+          title: "Pengangkutan, Hari-hari & Waktu/Jam",
+          summary: "Ulang kaji lengkap Bahasa Arab Tahun 5 berdasarkan Sukatan Pelajaran KAFA 2.0 JAKIM: Panduan lengkap kosa kata kenderaan, hari-hari dalam seminggu, serta sebutan waktu/jam.",
+          points: [
+            "<strong>1. Kenderaan dan Pengangkutan (وَسَائِلُ النَّقْلِ):</strong><br>" +
+            "Kosa kata pengangkutan darat, udara, dan air:<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">سَيَّارَةٌ</span> (Kereta)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">دَرَّاجَةٌ</span> (Basikal)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">دَرَّاجَةٌ نَارِيَّةٌ</span> (Motosikal)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">حَافِلَةٌ</span> (Bas)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">قِطَارٌ</span> (Kereta api)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">طَائِرَةٌ</span> (Kapal terbang)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">سَفِينَةٌ</span> (Kapal laut)",
+            "<strong>2. Hari-hari dalam Seminggu (أَيَّامُ الأُسْبُوعِ):</strong><br>" +
+            "Hafal turutan hari serta ejaan rasminya:<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">يَوْمُ الأَحَدِ</span> (Hari Ahad)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">يَوْمُ الاِثْنَيْنِ</span> (Hari Isnin)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">يَوْمُ الثُّلَاثَاءِ</span> (Hari Selasa)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">يَوْمُ الأَرْبِعَاءِ</span> (Hari Rabu)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">يَوْمُ الْخَمِيسِ</span> (Hari Khamis)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">يَوْمُ الْجُمُعَةِ</span> (Hari Jumaat)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">يَوْمُ السَّبْتِ</span> (Hari Sabtu)",
+            "<strong>3. Waktu dan Jam (الْوَقْتُ وَالسَّاعَةُ):</strong><br>" +
+            "Cara menyebut pukul serta keterangan tempoh waktu:<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">اَلسَّاعَةُ الْوَاحِدَةُ</span> (Pukul 1)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">اَلسَّاعَةُ الثَّانِيَةُ</span> (Pukul 2)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">اَلسَّاعَةُ الثَّالِثَةُ</span> (Pukul 3)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">اَلسَّاعَةُ الرَّابِعَةُ</span> (Pukul 4)<br>" +
+            "• <span class=\"font-semibold text-emerald-800\">اَلسَّاعَةُ الْخَامِسَةُ</span> (Pukul 5)<br>" +
+            "• <em>Keterangan Waktu</em>:<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">صَبَاحًا</span> (Pagi)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">نَهَارًا</span> (Tengah hari)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">مَسَاءً</span> (Petang)<br>" +
+            "&nbsp;&nbsp;- <span class=\"font-semibold text-emerald-800\">لَيْلًا</span> (Malam)<br>" +
+            "• <em>Contoh Ayat Gabungan</em>: <span class=\"font-semibold text-emerald-800\">اَلسَّاعَةُ الْخَامِسَةُ مَسَاءً</span> (Pukul 5 petang)." +
+            "\",\n" +
+            "            \"<strong>4. Komunikasi Asas & Ucapan Harian (الحِوَارُ وَالتَّحِيَّاتُ):</strong><br>\" +" +
+            "            \"<table class=\\\"w-full text-xs text-left mt-2 border-collapse border border-emerald-100\\\">\" +" +
+            "            \"  <thead>\" +" +
+            "            \"    <tr class=\\\"bg-emerald-50\\\">\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100\\\">Soalan & Jawab</th>\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100 text-right\\\">العربية</th>\" +" +
+            "            \"      <th class=\\\"p-1.5 border border-emerald-100\\\">Maksud</th>\" +" +
+            "            \"    </tr>\" +" +
+            "  </thead>\" +" +
+            "  <tbody>\" +" +
+            "    <tr>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Di mana kamu tinggal?</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">أَيْنَ تَسْكُنُ؟</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100\\\">Jawab: أَسْكُنُ فِي... (Saya tinggal di...)</td>\" +" +
+            "    </tr>\" +" +
+            "    <tr class=\\\"bg-emerald-50/30\\\">\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 font-semibold\\\">Di manakah sekolah?</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100 text-right text-emerald-800 font-semibold text-sm\\\">أَيْنَ الْمَدْرَسَةُ؟</td>\" +" +
+            "      <td class=\\\"p-1.5 border border-emerald-100\\\">Jawab: اَلْمَدْرَسَةُ قَرِيبَةٌ / بَعِيدَةٌ (Sekolah itu dekat / jauh)</td>\" +" +
+            "    </tr>\" +" +
+            "  </tbody>\" +" +
+            "</table>\""
+          ],
+          tip: "Ingat bahawa sebutan jam bermula dengan bentuk Muannas (اَلسَّاعَةُ) diikuti nombor turutan Muannas."
+        }
+      }
+    };
+
+    const questionBank = [
+      { id: "ibadah-1", subject: "Ibadah", type: "Objektif", question: "Antara berikut, yang manakah merupakan salah satu rukun wuduk?", options: ["Membasuh kaki hingga buku lali", "Berkumur-kumur", "Membasuh telinga", "Membaca basmalah"], answer: 0, explanation: "Membasuh kaki hingga buku lali ialah rukun wuduk keenam. Manakala berkumur, membasuh telinga, dan membaca basmalah adalah perkara sunat wuduk." },
+      { id: "ibadah-2", subject: "Ibadah", type: "Betul / Salah", question: "Muntah secara tidak sengaja membatalkan puasa.", options: ["Betul", "Salah"], answer: 1, explanation: "Hanya muntah dengan sengaja sahaja yang membatalkan puasa. Jika tidak sengaja, puasa tetap sah." },
+      { id: "ibadah-3", subject: "Ibadah", type: "Objektif", question: "Apakah hukum asal bagi lafaz Azan dan Iqamah?", options: ["Wajib Ain", "Harus", "Sunat Muakkad", "Makruh"], answer: 2, explanation: "Lafaz Azan dan Iqamah bagi solat berjemaah hukumnya ialah Sunat Muakkad (sangat dituntut)." },
+      { id: "ibadah-4", subject: "Ibadah", type: "Betul / Salah", question: "Sujud Sahwi dilakukan selepas memberi salam kedua.", options: ["Betul", "Salah"], answer: 1, explanation: "Sujud Sahwi dilakukan sebanyak dua kali sujud SEBELUM memberi salam pertama." },
+      { id: "ibadah-5", subject: "Ibadah", type: "Objektif", question: "Berapakah bilangan takbir dalam rakaat pertama Solat Hari Raya Aidilfitri (tidak termasuk takbiratul ihram)?", options: ["3 kali takbir", "5 kali takbir", "7 kali takbir", "9 kali takbir"], answer: 2, explanation: "Rakaat pertama solat sunat dua hari raya mengandungi 7 kali takbir, manakala rakaat kedua mengandungi 5 kali takbir." },
+      { id: "ibadah-6", subject: "Ibadah", type: "Betul / Salah", question: "Semasa mendirikan Solat Jenazah perempuan, Imam hendaklah berdiri setentang dengan kepala jenazah.", options: ["Betul", "Salah"], answer: 1, explanation: "Imam berdiri setentang dengan kepala jenazah lelaki, dan berdiri setentang dengan pinggang/punggung bagi jenazah perempuan." },
+      { id: "ibadah-7", subject: "Ibadah", type: "Objektif", question: "Yang manakah antara berikut dikelaskan sebagai rukun Qauli (lisan) dalam solat?", options: ["Niat", "Membaca Surah Al-Fatihah", "Rukuk serta tumakninah", "Tertib"], explanation: "Membaca Al-Fatihah ialah rukun Qauli. Niat & Tertib adalah rukun Qalbi, manakala Rukuk adalah rukun Fi'li.", answer: 1 },
+      { id: "ibadah-8", subject: "Ibadah", type: "Betul / Salah", question: "Air Mustakmal ialah air yang suci pada dirinya tetapi tidak boleh digunakan untuk menyucikan yang lain.", options: ["Betul", "Salah"], answer: 0, explanation: "Betul. Air Mustakmal telah digunakan untuk mengangkat hadas atau menghilangkan najis ringan, tidak boleh dibuat wuduk semula." },
+      { id: "akidah-1", subject: "Akidah", type: "Objektif", question: "Berapakah bilangan Rukun Iman?", options: ["Lima", "Enam", "Tujuh", "Lapan"], answer: 1, explanation: "Rukun Iman berjumlah enam." },
+      { id: "akidah-2", subject: "Akidah", type: "Betul / Salah", question: "Malaikat ialah makhluk Allah yang sentiasa taat kepada perintah-Nya.", options: ["Betul", "Salah"], answer: 0, explanation: "Malaikat tidak pernah ingkar terhadap perintah Allah." },
+      { id: "sirah-1", subject: "Sirah", type: "Objektif", question: "Apakah gelaran Nabi Muhammad SAW kerana sifat amanah baginda?", options: ["Al-Faruq", "Al-Amin", "Zunnurain", "As-Siddiq"], answer: 1, explanation: "Nabi Muhammad SAW digelar Al-Amin, iaitu orang yang sangat dipercayai." },
+      { id: "sirah-2", subject: "Sirah", type: "Betul / Salah", question: "Hijrah Nabi Muhammad SAW ialah dari Makkah ke Madinah.", options: ["Betul", "Salah"], answer: 0, explanation: "Baginda berhijrah dari Makkah ke Madinah untuk membina masyarakat Islam." },
+      { id: "quran-1", subject: "Al-Quran", type: "Objektif", question: "Surah apakah yang wajib dibaca dalam setiap rakaat solat?", options: ["Al-Ikhlas", "Al-Fatihah", "Al-Falaq", "An-Nas"], answer: 1, explanation: "Membaca Al-Fatihah ialah rukun solat." },
+      { id: "adab-1", subject: "Adab", type: "Betul / Salah", question: "Kita boleh mengejek rakan jika mereka melakukan kesilapan.", options: ["Betul", "Salah"], answer: 1, explanation: "Islam mengajar kita menasihati rakan dengan baik, bukan mengejek mereka." },
+      { id: "jawi-1", subject: "Jawi", type: "Objektif", question: "Ke arah manakah tulisan Jawi dibaca?", options: ["Kiri ke kanan", "Atas ke bawah", "Kanan ke kiri", "Bawah ke atas"], answer: 2, explanation: "Tulisan Jawi dibaca dari kanan ke kiri." },
+      { id: "arab-1", subject: "Bahasa Arab", type: "Objektif", question: "Apakah maksud perkataan عرب 'كتاب'?", options: ["Pen", "Buku", "Kerusi", "Meja"], answer: 1, explanation: "كتاب bermaksud buku." }
+    ];
+
+    const state = {
+      activeSubject: "Ibadah",
+      activeYear: 1,
+      activeQuranTab: "tajwid", // "tajwid" or "hafazan"
+      practiceSubject: "Semua",
+      answers: {},
+      readingMode: false
+    };
+
+    const views = document.querySelectorAll(".view");
+    const navTabs = document.querySelectorAll(".nav-tab");
+    const appShell = document.getElementById("app-shell");
+
+    function showView(viewId) {
+      views.forEach(view => view.classList.toggle("active", view.id === viewId));
+      navTabs.forEach(tab => tab.classList.toggle("active", tab.dataset.view === viewId));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (viewId === "practice-view") renderPractice();
+      if (viewId === "achievements-view") renderAchievements();
+    }
+
+    function openLevels(subject) {
+      state.activeSubject = subject;
+      document.getElementById("levels-title").textContent = "Pilih Tahun";
+      const years = [1, 2, 3, 4, 5];
+      const list = document.getElementById("year-list");
+      list.innerHTML = years.map(year => `
+        <button class="year-card" type="button" data-year="${year}">
+          <span class="year-badge">${year}</span>
+          <span>
+            <strong class="block text-sm">Tahun ${year}</strong>
+            <small class="text-[#6b8573]">Nota ${subject}</small>
+          </span>
+          <i data-lucide="chevron-right" class="text-[#609172]"></i>
+        </button>
+      `).join("");
+      list.querySelectorAll("[data-year]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.activeQuranTab = "tajwid"; // Default tab
+          openLesson(Number(button.dataset.year));
+        });
+      });
+      showView("levels-view");
+      lucide.createIcons();
+    }
+
+    function openLesson(year) {
+      state.activeYear = year;
+      const lesson = lessons[state.activeSubject][year];
+      document.getElementById("lesson-meta").textContent = `${state.activeSubject} · Tahun ${year}`;
+      
+      const quranTabs = document.getElementById("quran-sub-tabs");
+      if (state.activeSubject === "Al-Quran") {
+        quranTabs.classList.remove("hidden");
+        updateQuranTabs();
+      } else {
+        quranTabs.classList.add("hidden");
+        document.getElementById("lesson-title").textContent = lesson.title;
+        document.getElementById("lesson-summary").textContent = lesson.summary;
+        document.getElementById("lesson-points").innerHTML = lesson.points.map(point => `
+          <div class="lesson-point">
+            <span class="point-dot"><i data-lucide="check" style="width:14px;height:14px"></i></span>
+            <span>${point}</span>
+          </div>
+        `).join("");
+        document.getElementById("lesson-tip").innerHTML = `<strong>Tip ulang kaji:</strong> ${lesson.tip}`;
+      }
+      
+      showView("lesson-view");
+      lucide.createIcons();
+    }
+
+    function updateQuranTabs() {
+      const tabTajwidBtn = document.getElementById("tab-tajwid");
+      const tabHafazanBtn = document.getElementById("tab-hafazan");
+      const lesson = lessons["Al-Quran"][state.activeYear];
+      
+      if (state.activeQuranTab === "tajwid") {
+        tabTajwidBtn.className = "flex-1 text-center py-2.5 px-3 rounded-lg text-xs font-extrabold bg-[#53ad74] text-white shadow-sm transition-all";
+        tabHafazanBtn.className = "flex-1 text-center py-2.5 px-3 rounded-lg text-xs font-bold text-[#5c7a67] hover:bg-[#e4ebd3] transition-all";
+        
+        document.getElementById("lesson-title").textContent = lesson.tajwidTitle;
+        document.getElementById("lesson-summary").textContent = lesson.tajwidSummary;
+        document.getElementById("lesson-points").innerHTML = lesson.tajwidPoints.map(point => `
+          <div class="lesson-point">
+            <span class="point-dot"><i data-lucide="check" style="width:14px;height:14px"></i></span>
+            <span>${point}</span>
+          </div>
+        `).join("");
+        document.getElementById("lesson-tip").innerHTML = `<strong>Tip Tajwid:</strong> ${lesson.tajwidTip}`;
+      } else {
+        tabHafazanBtn.className = "flex-1 text-center py-2.5 px-3 rounded-lg text-xs font-extrabold bg-[#53ad74] text-white shadow-sm transition-all";
+        tabTajwidBtn.className = "flex-1 text-center py-2.5 px-3 rounded-lg text-xs font-bold text-[#5c7a67] hover:bg-[#e4ebd3] transition-all";
+        
+        document.getElementById("lesson-title").textContent = lesson.hafazanTitle;
+        document.getElementById("lesson-summary").textContent = lesson.hafazanSummary;
+        document.getElementById("lesson-points").innerHTML = lesson.hafazanPoints.map(point => `
+          <div class="lesson-point">
+            <span class="point-dot"><i data-lucide="book-open" style="width:14px;height:14px"></i></span>
+            <span>${point}</span>
+          </div>
+        `).join("");
+        document.getElementById("lesson-tip").innerHTML = `<strong>Tip Amali:</strong> ${lesson.hafazanTip}`;
+      }
+      lucide.createIcons();
+    }
+
+    document.getElementById("tab-tajwid").addEventListener("click", () => {
+      state.activeQuranTab = "tajwid";
+      updateQuranTabs();
+    });
+
+    document.getElementById("tab-hafazan").addEventListener("click", () => {
+      state.activeQuranTab = "hafazan";
+      updateQuranTabs();
+    });
+
+    function filteredQuestions() {
+      return state.practiceSubject === "Semua"
+        ? questionBank
+        : questionBank.filter(question => question.subject === state.practiceSubject);
+    }
+
+    function renderPractice() {
+      const subjects = ["Semua", "Ibadah", "Akidah", "Sirah", "Al-Quran", "Adab", "Jawi", "Bahasa Arab"];
+      document.getElementById("practice-filters").innerHTML = subjects.map(subject => `
+        <button class="filter-chip ${subject === state.practiceSubject ? "active" : ""}" type="button" data-filter="${subject}">${subject}</button>
+      `).join("");
+
+      document.querySelectorAll("[data-filter]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.practiceSubject = button.dataset.filter;
+          renderPractice();
+        });
+      });
+
+      const questions = filteredQuestions();
+      const questionList = document.getElementById("question-list");
+
+      if (!questions.length) {
+        questionList.innerHTML = `<div class="empty-note">Latihan untuk subjek ini akan ditambah tidak lama lagi.</div>`;
+        updateScore();
+        return;
+      }
+
+      questionList.innerHTML = questions.map((question, index) => {
+        const answered = Object.prototype.hasOwnProperty.call(state.answers, question.id);
+        const selected = state.answers[question.id];
+        const isCorrect = selected === question.answer;
+
+        return `
+          <article class="question-card" data-question-id="${question.id}">
+            <span class="question-label">${question.subject} · ${question.type}</span>
+            <h2 class="font-extrabold leading-6 text-[0.95rem] mt-3">${index + 1}. ${question.question}</h2>
+            <div class="mt-3">
+              ${question.options.map((option, optionIndex) => {
+                let classes = "answer-option";
+                if (answered && optionIndex === question.answer) classes += " correct";
+                else if (answered && optionIndex === selected) classes += " wrong";
+                return `<button class="${classes}" type="button" data-answer="${optionIndex}" ${answered ? "disabled" : ""}>${option}</button>`;
+              }).join("")}
+            </div>
+            ${answered ? `<div class="feedback ${isCorrect ? "correct" : "wrong"}">${isCorrect ? "✓ Tepat! " : "✦ Cuba lagi pada soalan seterusnya. "}${question.explanation}</div>` : ""}
+          </article>
+        `;
+      }).join("");
+
+      questionList.querySelectorAll("[data-question-id]").forEach(card => {
+        card.querySelectorAll("[data-answer]").forEach(button => {
+          button.addEventListener("click", () => {
+            const question = questionBank.find(item => item.id === card.dataset.questionId);
+            if (Object.prototype.hasOwnProperty.call(state.answers, question.id)) return;
+            state.answers[question.id] = Number(button.dataset.answer);
+            renderPractice();
+          });
+        });
+      });
+
+      updateScore();
+    }
+
+    function answeredQuestions() {
+      return questionBank.filter(question => Object.prototype.hasOwnProperty.call(state.answers, question.id));
+    }
+
+    function correctCount() {
+      return answeredQuestions().filter(question => state.answers[question.id] === question.answer).length;
+    }
+
+    function updateScore() {
+      const answered = answeredQuestions().length;
+      const correct = correctCount();
+      const accuracy = answered ? Math.round((correct / answered) * 100) : 0;
+      document.getElementById("score-summary").textContent = `${correct} / ${answered} betul`;
+      document.getElementById("score-circle").textContent = `${accuracy}%`;
+    }
+
+    function renderAchievements() {
+      const answered = answeredQuestions().length;
+      const correct = correctCount();
+      const accuracy = answered ? Math.round((correct / answered) * 100) : 0;
+      const badges = [
+        { icon: "circle-play", title: "Langkah Pertama", text: "Jawab sekurang-kurangnya 1 soalan.", unlocked: answered >= 1 },
+        { icon: "star", title: "Bintang Ilmu", text: "Kumpulkan 3 jawapan tepat.", unlocked: correct >= 3 },
+        { icon: "medal", title: "Juara KAFA", text: "Capai 80% ketepatan selepas 5 soalan.", unlocked: answered >= 5 && accuracy >= 80 }
+      ];
+
+      document.getElementById("achievement-summary-text").textContent = answered
+        ? `${accuracy}% ketepatan setakat ini`
+        : "Mulakan latihan untuk kumpul lencana";
+      document.getElementById("mastery-progress").style.width = `${Math.min(100, accuracy)}%`;
+
+      document.getElementById("achievement-list").innerHTML = badges.map(badge => `
+        <article class="achievement-card ${badge.unlocked ? "" : "locked"}">
+          <div class="achievement-icon"><i data-lucide="${badge.icon}"></i></div>
+          <div>
+            <h2 class="font-extrabold text-sm">${badge.title}</h2>
+            <p class="text-xs text-[#68806f] leading-5 mt-1">${badge.unlocked ? "Lencana telah dibuka! Tahniah." : badge.text}</p>
+          </div>
+        </article>
+      `).join("");
+      lucide.createIcons();
+    }
+
+    document.getElementById("start-learning").addEventListener("click", () => showView("subjects-view"));
+    document.getElementById("back-to-subjects").addEventListener("click", () => showView("subjects-view"));
+    document.getElementById("back-to-levels").addEventListener("click", () => openLevels(state.activeSubject));
+    document.getElementById("lesson-practice").addEventListener("click", () => {
+      state.practiceSubject = state.activeSubject;
+      showView("practice-view");
+    });
+
+    document.querySelectorAll(".subject-card").forEach(card => {
+      card.addEventListener("click", () => openLevels(card.dataset.subject));
+    });
+
+    navTabs.forEach(tab => {
+      tab.addEventListener("click", () => showView(tab.dataset.view));
+    });
+
+    document.getElementById("reading-mode-toggle").addEventListener("click", event => {
+      state.readingMode = !state.readingMode;
+      appShell.classList.toggle("reading-mode", state.readingMode);
+      event.currentTarget.classList.toggle("on", state.readingMode);
+      event.currentTarget.setAttribute("aria-checked", String(state.readingMode));
+    });
+
+    document.getElementById("reset-session").addEventListener("click", () => {
+      state.answers = {};
+      renderPractice();
+      renderAchievements();
+    });
+
+    lucide.createIcons();
+  </script>
+ </body>
+</html>
