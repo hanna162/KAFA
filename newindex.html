@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ms">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KAFA Pintar</title>
+  <script src="https://tailwindcss.com"></script>
+  <script src="https://jsdelivr.net"></script>
+  <link href="https://googleapis.com" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #244536;
+      --muted: #668072;
+      --mint: #dff5dd;
+      --mint-strong: #62bd83;
+      --yellow: #ffd76a;
+      --blue: #cceeff;
+      --paper: #fffef9;
+      --line: #e4eee5;
+      --coral: #ff8d70;
+      --shadow: 0 16px 40px rgba(57, 98, 70, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { background: #edf6ed; }
+    body { margin: 0; width: 100%; min-height: 100vh; font-family: "DM Sans", sans-serif; color: var(--ink); overflow-x: hidden; }
+    button { cursor: pointer; font: inherit; transition: all 150ms ease; }
+    .app-shell { width: 100%; max-width: 480px; min-height: 100vh; margin: 0 auto; position: relative; background: var(--paper); box-shadow: 0 0 60px rgba(38, 74, 53, 0.13); display: flex; flex-direction: column; }
+    .app-main { flex: 1; padding: 18px 18px 120px; position: relative; z-index: 1; }
+    .view { display: none; animation: slideIn 260ms ease both; }
+    .view.active { display: block; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .decor { position: absolute; border-radius: 999px; pointer-events: none; z-index: 0; }
+    .decor.one { width: 180px; height: 180px; background: #e4f7df; right: -72px; top: 92px; }
+    .decor.two { width: 110px; height: 110px; background: #fff0b8; left: -45px; top: 360px; }
+    .decor.three { width: 132px; height: 132px; background: #d7f2ff; right: -58px; bottom: 118px; }
+    .eyebrow { display: inline-flex; gap: 7px; align-items: center; padding: 7px 11px; border-radius: 999px; background: #f2f9ed; font-size: 0.73rem; font-weight: 800; color: #4c8b5f; }
+    .display-font { font-family: "Fraunces", serif; }
+    .content-card, .lesson-panel { border: 1px solid rgba(74, 127, 85, 0.11); box-shadow: var(--shadow); }
+    .welcome-illustration { width: 100%; height: 214px; border-radius: 28px; background: #dff4e5; }
+    .primary-btn { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 9px; background: #53ad74; color: white; border-radius: 18px; padding: 16px 18px; font-weight: 800; }
+    .subject-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .subject-card { padding: 16px; text-align: left; border-radius: 24px; display: flex; flex-direction: column; justify-content: space-between; min-height: 142px; }
+    .subject-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px; background: rgba(255,255,255,0.8); }
+    .year-list { display: grid; gap: 11px; }
+    .year-card { width: 100%; border: 1px solid #e1ebdf; background: #ffffff; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; padding: 15px 16px; }
+    .year-badge { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 14px; color: #346e48; background: #e5f5e2; font-weight: 800; }
+    .lesson-panel { background: #ffffff; border-radius: 25px; padding: 20px; line-height: 1.7; }
+    .lesson-panel h3 { font-size: 1.15rem; font-weight: 700; color: #1c3a2c; margin-top: 12px; margin-bottom: 8px; border-bottom: 2px solid #e4eee5; padding-bottom: 4px; }
+    .lesson-panel p { font-size: 0.95rem; margin-bottom: 6px; color: #334e3f; }
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100%, 480px); z-index: 20; background: rgba(255, 254, 249, 0.97); border-top: 1px solid #e3ece0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 7px calc(8px + env(safe-area-inset-bottom)); backdrop-filter: blur(14px); }
+    .nav-tab { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 800; color: #7d9485; background: transparent; border: 0; padding: 6px 4px; }
+    .nav-tab.active { color: #3fa167; }
+    .sub-tab-btn { flex: 1; padding: 10px; font-weight: 700; font-size: 0.88rem; border-radius: 12px; background: #f3f4f6; color: #4b5563; }
+    .sub-tab-btn.active { background: #53ad74; color: white; }
+    .quiz-option-btn { width: 100%; text-align: left; padding: 14px 16px; background: #f7faf6; border: 2px solid #e2ebd0; border-radius: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+    .quiz-option-btn.correct { background: #def7ec !important; border-color: #31c48d !important; color: #03543f !important; }
+    .quiz-option-btn.incorrect { background: #fde8e8 !important; border-color: #f98080 !important; color: #9b1c1c !important; }
+  </style>
+ </head>
+ <body>
+  <div class="app-shell">
+    <div class="decor one"></div><div class="decor two"></div><div class="decor three"></div>
+    <div class="app-main">
+      <!-- WELCOME SCREEN -->
+      <div id="view-welcome" class="view active">
+        <div class="text-center pt-8 pb-4">
+          <span class="eyebrow"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> JAKIM KAFA 2.0</span>
+          <h1 class="display-font text-4xl font-extrabold mt-3 text-[#1c3a2c]">KAFA Pintar</h1>
+          <p class="text-sm font-semibold text-[#577263]">Aplikasi Pembelajaran Interaktif Murid</p>
+        </div>
+        <div class="my-6 px-2"><div class="welcome-illustration flex items-center justify-center"><i data-lucide="book-open" class="w-24 h-24 text-[#449c66]"></i></div></div>
+        <div class="mt-8 px-2"><button onclick="switchView('subjek')" class="primary-btn text-lg shadow-lg"><span>MULA BELAJAR</span><i data-lucide="arrow-right" class="w-5 h-5"></i></button></div>
+      </div>
+      <!-- LAMAN UTAMA -->
+      <div id="view-utama" class="view">
+        <h2 class="display-font text-2xl font-bold mb-4">Laman Utama</h2>
+        <div class="bg-gradient-to-br from-[#e4f7df] to-[#cbeed0] p-5 rounded-3xl mb-4 content-card">
+          <h3 class="font-bold text-lg text-[#1e3d2c]">Ahlan Wa Sahlan! 👋</h3>
+          <p class="text-sm text-[#476654] mt-1">Jom mantapkan ilmu fardu ain dan persediaan cemerlang menghadapi peperiksaan UPKK!</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="bg-white p-4 rounded-2xl content-card text-center"><i data-lucide="award" class="w-8 h-8 text-yellow-500 mx-auto mb-1"></i><span class="text-xs font-bold text-gray-500 block">Mata Ganjaran</span><strong id="home-xp" class="text-xl font-extrabold">0 XP</strong></div>
+          <div class="bg-white p-4 rounded-2xl content-card text-center"><i data-lucide="check-circle" class="w-8 h-8 text-green-500 mx-auto mb-1"></i><span class="text-xs font-bold text-gray-500 block">Kuiz Selesai</span><strong id="home-quizzes" class="text-xl font-extrabold">0</strong></div>
+        </div>
+      </div>
+      <!-- SUBJEK -->
+      <div id="view-subjek" class="view">
+        <div class="section-heading mb-4"><h2 class="display-font text-2xl font-bold">Modul Pembelajaran</h2><p class="text-xs font-semibold text-gray-500">Pilih subjek di bawah untuk membuka nota</p></div>
+        <div class="subject-grid mt-2" id="subject-list-container"></div>
+      </div>
+      <!-- TAHUN -->
+      <div id="view-tahun" class="view">
+        <div class="flex items-center gap-3 mb-4"><button onclick="switchView('subjek')" class="p-2 bg-gray-100 rounded-xl"><i data-lucide="arrow-left" class="w-5 h-5"></i></button><h2 id="tahun-view-title" class="display-font text-2xl font-bold">Pilih Tahun</h2></div>
+        <div class="year-list" id="year-list-container"></div>
+      </div>
+      <!-- LESSON -->
+      <div id="view-lesson" class="view">
+        <div class="flex items-center justify-between mb-4"><button onclick="goBackToYears()" class="p-2 bg-gray-100 rounded-xl"><i data-lucide="arrow-left" class="w-5 h-5"></i></button><h2 id="lesson-view-title" class="display-font text-xl font-bold text-center flex-1">Nota</h2></div>
+        <div id="al-quran-sub-tabs" class="hidden flex gap-2 p-1.5 bg-gray-100 rounded-2xl mb-4">
+          <button id="btn-subtab-teori" onclick="toggleAlQuranSubTab('teori')" class="sub-tab-btn active">Nota Tajwid (Teori)</button>
+          <button id="btn-subtab-amali" onclick="toggleAlQuranSubTab('amali')" class="sub-tab-btn">Hafazan (Amali)</button>
+        </div>
+        <div id="lesson-content-body" class="lesson-panel shadow-sm"></div>
+      </div>
+      <!-- LATIHAN -->
+      <div id="view-latihan" class="view">
+        <h2 class="display-font text-2xl font-bold mb-2">Pusat Kuiz</h2>
+        <div id="quiz-subject-panel" class="grid gap-2.5"></div>
+        <div id="quiz-year-panel" class="hidden">
+          <button onclick="hideQuizYearPanel()" class="mb-4 text-sm font-bold text-[#53ad74] flex items-center gap-1"><i data-lucide="chevron-left" class="w-4 h-4"></i> Kembali</button>
+          <h3 class="font-bold mb-3 text-lg">Pilih Tahun Latihan:</h3>
+          <div class="grid gap-2" id="quiz-year-buttons"></div>
+        </div>
+        <div id="quiz-arena" class="hidden bg-white p-5 rounded-3xl content-card mt-2">
+          <div class="flex justify-between items-center border-b pb-3 mb-4"><span id="quiz-progress-text" class="text-xs font-bold text-gray-500">Soalan 1 daripada 10</span><span class="text-xs font-bold text-red-500 flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> UPKK Standard</span></div>
+          <div id="quiz-question-text" class="text-base font-bold mb-5 leading-relaxed text-[#1c3a2c]"></div>
+          <div id="quiz-options-container" class="grid gap-2.5"></div>
